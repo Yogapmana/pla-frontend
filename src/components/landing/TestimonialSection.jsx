@@ -33,14 +33,14 @@ export default function TestimonialSection() {
             variants={shouldReduceMotion ? {} : fadeUp}
             className="text-3xl sm:text-4xl md:text-5xl font-display font-medium text-primary leading-tight tracking-tight relative z-10"
           >
-            "Pendekatan AI agent yang memecah materi dari yang tadinya sulit dimengerti menjadi terstruktur sungguh membantu. <span className="italic font-bold text-tertiary">Belajar terasa jauh lebih cerdas dan efisien.</span>"
+            "Belajar bukanlah tentang menghafal fakta, <span className="italic font-bold text-tertiary">melainkan melatih pikiran untuk berpikir.</span>"
           </motion.h2>
 
           <motion.p
             variants={shouldReduceMotion ? {} : fadeUp}
             className="mt-8 text-base sm:text-lg text-secondary font-label uppercase tracking-widest relative z-10"
           >
-            — Mahasiswa & Profesional
+            — Albert Einstein
           </motion.p>
           
         </motion.div>
