@@ -43,32 +43,6 @@ export default function TestimonialSection() {
             — Mahasiswa & Profesional
           </motion.p>
           
-          <motion.div variants={shouldReduceMotion ? {} : fadeUp} className="mt-24 pt-16 relative z-10">
-              <h3 className="text-3xl sm:text-4xl font-display font-bold text-primary mb-4">Siap untuk mulai?</h3>
-              <p className="text-lg text-secondary mb-10">Buat akun gratis dan rasakan pembelajaran masa depan.</p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/register">
-                  <Button
-                    size="lg"
-                    variant="tertiary"
-                    className="w-full sm:w-auto px-10 py-7 text-lg font-semibold rounded-xl shadow-warm-lg font-label tracking-wide group transition-all duration-300 hover:shadow-warm-xl hover:-translate-y-0.5"
-                  >
-                    Mulai Belajar Gratis
-                    <ArrowRight className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </Button>
-                </Link>
-                <Link to="/login">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto px-10 py-7 text-lg font-semibold rounded-xl border-2 font-label tracking-wide bg-surface/60 transition-all duration-300 hover:shadow-warm-md hover:-translate-y-0.5"
-                  >
-                    Masuk
-                  </Button>
-                </Link>
-              </div>
-          </motion.div>
         </motion.div>
       </div>
     </section>
