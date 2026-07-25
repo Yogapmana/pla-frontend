@@ -118,12 +118,9 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3 group">
-              <div className="bg-tertiary/10 p-2.5 rounded-xl text-tertiary ring-1 ring-tertiary/20 transition-transform duration-300 group-hover:scale-105">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <span className="text-2xl font-display font-bold text-primary tracking-tight">
-                Synapsa
-              </span>
+              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <img src="/horizontal-logo.png" alt="Synapsa Logo" className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105" />
+              </Link>
               <span className="text-xs text-secondary/60 font-label font-medium bg-surface-1 px-2 py-1 rounded-md">
                 v1.0
               </span>
