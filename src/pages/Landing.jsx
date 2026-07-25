@@ -8,8 +8,8 @@ import LanguageToggle from '@/components/common/LanguageToggle'
 import HeroSection from '@/components/landing/HeroSection'
 import FeaturesBento from '@/components/landing/FeaturesBento'
 import HowItWorksSection from '@/components/landing/HowItWorksSection'
-import SocialProofSection from '@/components/landing/SocialProofSection'
-import CTASection from '@/components/landing/CTASection'
+import UseCasesSection from '@/components/landing/UseCasesSection'
+import TestimonialSection from '@/components/landing/TestimonialSection'
 
 function scrollToSection(id) {
   return (e) => {
@@ -101,10 +101,17 @@ export default function Landing() {
 
       <main>
         <HeroSection />
-        <FeaturesBento />
-        <HowItWorksSection />
-        <SocialProofSection />
-        <CTASection />
+        
+        <div id="fitur">
+          <FeaturesBento />
+        </div>
+        
+        <div id="cara-kerja">
+          <HowItWorksSection />
+        </div>
+
+        <UseCasesSection />
+        <TestimonialSection />
       </main>
 
       <footer className="bg-surface text-secondary py-12 border-t border-border-subtle/30">

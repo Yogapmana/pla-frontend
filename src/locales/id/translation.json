@@ -457,17 +457,6 @@
       "step4_title": "Belajar, tanya, kuis",
       "step4_desc": "Baca modul, tanya Tutor AI kontekstual, dan uji pemahamanmu."
     },
-    "proof": {
-      "eyebrow": "Bukti konsep",
-      "quote_before": "“Synapsa dirancang untuk skripsi S1. Pengujian internal menunjukkan",
-      "quote_highlight": "87%",
-      "quote_after": "kepuasan pengguna pada kuis adaptif.”",
-      "attribution": "— Sample data, skripsi 2026",
-      "metric1": "Kepuasan kuis adaptif",
-      "metric2": "Sumber materi",
-      "metric3": "Agent kolaboratif",
-      "signature": "Quality you can feel"
-    },
     "cta": {
       "eyebrow": "Mulai sekarang",
       "title_before": "Siap belajar dengan cara yang",

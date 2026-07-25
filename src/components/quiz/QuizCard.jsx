@@ -1,5 +1,4 @@
 import ReactMarkdown from 'react-markdown';
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { OptionButton } from './OptionButton';
 import { QuizFeedback } from './QuizFeedback';
@@ -14,7 +13,6 @@ function dotClass(status, isCurrent) {
 
 /**
  * QuizCard — question + options + progress dots.
- * Keyboard: A–D / 1–4 pilih opsi; Enter / → next setelah reveal.
  * Dot answered → klik review (read-only).
  */
 export function QuizCard({
@@ -33,33 +31,6 @@ export function QuizCard({
   const correctCount = answerStatuses.filter((s) => s === 'correct').length
   const wrongCount = answerStatuses.filter((s) => s === 'wrong').length
   const answeredCount = correctCount + wrongCount
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const onKey = (e) => {
-      const tag = e.target?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return
-
-      if (!isRevealed) {
-        const key = e.key.toLowerCase()
-        let idx = -1
-        if (key >= 'a' && key <= 'd') idx = key.charCodeAt(0) - 97
-        else if (key >= '1' && key <= '4') idx = Number(key) - 1
-        if (idx >= 0 && idx < (question.options?.length || 0)) {
-          e.preventDefault()
-          onSelectOption(question.options[idx])
-        }
-        return
-      }
-
-      if (e.key === 'Enter' || e.key === 'ArrowRight') {
-        e.preventDefault()
-        onNext?.()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [isRevealed, question, onSelectOption, onNext])
 
   return (
     <motion.div
@@ -213,10 +184,6 @@ export function QuizCard({
               />
             ))}
           </div>
-
-          <p className="mt-3 text-[11px] text-secondary/60 font-label hidden sm:block">
-            Pintasan: A–D atau 1–4 pilih · Enter lanjut
-          </p>
 
           {isRevealed && (
             <QuizFeedback

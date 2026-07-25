@@ -12,6 +12,9 @@ export function useQuiz(topicId, numQuestions) {
     queryKey: ['quiz', topicId, numQuestions],
     queryFn: () => getQuiz(topicId, numQuestions),
     enabled: !!topicId,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: Infinity,
   })
 }
 
