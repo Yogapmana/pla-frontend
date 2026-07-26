@@ -466,6 +466,21 @@
       "cta_secondary": "Sudah punya akun? Masuk",
       "quote": "“Belajar bukanlah tentang menghafal fakta, melainkan melatih pikiran untuk berpikir.” — Albert Einstein"
     },
+    "useCases": {
+      "eyebrow": "Skenario Penggunaan",
+      "title": "Satu Platform untuk ",
+      "title_highlight": "Segala Kebutuhan Belajarmu",
+      "case1_title": "Persiapan Ujian",
+      "case1_desc": "Pelajari materi yang spesifik untuk ujianmu, dan tes pemahaman dengan kuis adaptif.",
+      "case2_title": "Belajar Skill Baru",
+      "case2_desc": "Mulai dari programming hingga desain, AI merancang kurikulum step-by-step untuk pemula.",
+      "case3_title": "Eksplorasi Konsep",
+      "case3_desc": "Gali dalam-dalam topik apa pun yang membuatmu penasaran tanpa batas kurikulum konvensional."
+    },
+    "testimonial": {
+      "quote1": "Belajar bukanlah tentang menghafal fakta,",
+      "quote2": "melainkan melatih pikiran untuk berpikir."
+    },
     "graph": {
       "topic": "Topik",
       "concept": "Konsep",

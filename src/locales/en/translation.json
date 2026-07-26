@@ -477,6 +477,21 @@
       "cta_secondary": "Already have an account? Log In",
       "quote": "“Learning is not about memorizing facts, but training the mind to think.” — Albert Einstein"
     },
+    "useCases": {
+      "eyebrow": "Use Cases",
+      "title": "One Platform for ",
+      "title_highlight": "All Your Learning Needs",
+      "case1_title": "Exam Preparation",
+      "case1_desc": "Study materials specifically tailored for your exams, and test your understanding with adaptive quizzes.",
+      "case2_title": "Learn New Skills",
+      "case2_desc": "From programming to design, AI designs a step-by-step curriculum for beginners.",
+      "case3_title": "Explore Concepts",
+      "case3_desc": "Dive deep into any topic that makes you curious without the limits of a conventional curriculum."
+    },
+    "testimonial": {
+      "quote1": "Learning is not about memorizing facts,",
+      "quote2": "but training the mind to think."
+    },
     "graph": {
       "topic": "Topic",
       "concept": "Concept",

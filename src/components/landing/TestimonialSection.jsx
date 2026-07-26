@@ -33,7 +33,7 @@ export default function TestimonialSection() {
             variants={shouldReduceMotion ? {} : fadeUp}
             className="text-3xl sm:text-4xl md:text-5xl font-display font-medium text-primary leading-tight tracking-tight relative z-10"
           >
-            "Belajar bukanlah tentang menghafal fakta, <span className="italic font-bold text-tertiary">melainkan melatih pikiran untuk berpikir.</span>"
+            "{t('landing.testimonial.quote1', 'Belajar bukanlah tentang menghafal fakta,')} <span className="italic font-bold text-tertiary">{t('landing.testimonial.quote2', 'melainkan melatih pikiran untuk berpikir.')}</span>"
           </motion.h2>
 
           <motion.p
