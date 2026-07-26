@@ -7,7 +7,11 @@ import StepIllustration from './StepIllustration'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const MAX_FILES = 3
-const ALLOWED_TYPES = ['application/pdf']
+const ALLOWED_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain'
+]
 
 function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`
@@ -29,8 +33,12 @@ export default function StepUpload({ data, onChange }) {
       const newFiles = []
       for (const file of incoming) {
         if (!ALLOWED_TYPES.includes(file.type)) {
-          setValidationError('Hanya file PDF yang didukung.')
-          return
+          // Fallback check for .docx and .txt extensions just in case the mime type is missing
+          const ext = file.name.split('.').pop().toLowerCase()
+          if (!['pdf', 'docx', 'txt'].includes(ext)) {
+            setValidationError('Hanya file PDF, DOCX, dan TXT yang didukung.')
+            return
+          }
         }
         if (file.size > MAX_FILE_SIZE) {
           setValidationError(`File "${file.name}" melebihi batas 10MB.`)
@@ -119,13 +127,13 @@ export default function StepUpload({ data, onChange }) {
             {t('onboarding.upload_placeholder')}
           </p>
           <p className="text-xs text-secondary font-label">
-            PDF · maks 10MB per file · hingga {MAX_FILES} file
+            PDF, DOCX, TXT · maks 10MB per file · hingga {MAX_FILES} file
           </p>
         </div>
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,application/pdf"
+          accept=".pdf,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.txt,text/plain"
           multiple
           onChange={handleFileInput}
           className="hidden"
