@@ -235,7 +235,16 @@ function ContentWithImages({ content, className }) {
 }
 
 function MarkdownRenderer({ content, className }) {
-  return <ContentWithImages content={content} className={className} />
+  const processedContent = useMemo(() => {
+    if (!content) return '';
+    return content
+      .replace(/\\\[/g, '$$$$')
+      .replace(/\\\]/g, '$$$$')
+      .replace(/\\\(/g, '$$')
+      .replace(/\\\)/g, '$$');
+  }, [content]);
+
+  return <ContentWithImages content={processedContent} className={className} />
 }
 
 export default MarkdownRenderer
