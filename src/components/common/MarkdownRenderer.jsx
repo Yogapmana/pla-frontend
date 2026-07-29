@@ -2,6 +2,9 @@ import { useMemo, useState, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 import { Check, Copy, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -219,8 +222,8 @@ function ContentWithImages({ content, className }) {
         return (
           <ReactMarkdown
             key={i}
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeHighlight, rehypeKatex]}
             components={components}
           >
             {segment.content}

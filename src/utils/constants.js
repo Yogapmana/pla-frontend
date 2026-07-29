@@ -99,7 +99,7 @@ export const QUIZ_FEEDBACK = [
   },
 ];
 
-export const SynapsaTFORM_COLORS = {
+export const PLATFORM_COLORS = {
   coursera: '#0056d2',
   udemy: '#a435f0',
   edx: '#02262b',

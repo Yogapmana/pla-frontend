@@ -1,7 +1,7 @@
 import { Star, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { SynapsaTFORM_COLORS } from '@/utils/constants'
+import { PLATFORM_COLORS } from '@/utils/constants'
 import { motion, useReducedMotion } from 'framer-motion'
 
 const PRICE_VARIANTS = {
@@ -11,7 +11,7 @@ const PRICE_VARIANTS = {
 }
 
 function PlatformLogo({ platform }) {
-  const color = SynapsaTFORM_COLORS[platform?.toLowerCase()] || '#6b7280'
+  const color = PLATFORM_COLORS[platform?.toLowerCase()] || '#6b7280'
   return (
     <div
       className="flex size-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white"
@@ -51,7 +51,7 @@ function RatingStars({ rating }) {
 
 export default function CourseCard({ course }) {
   const platform = course.platform?.toLowerCase() ?? ''
-  const platformColor = SynapsaTFORM_COLORS[platform] || '#6b7280'
+  const platformColor = PLATFORM_COLORS[platform] || '#6b7280'
   const priceClass = PRICE_VARIANTS[course.price_type] || PRICE_VARIANTS.gratis
   const shouldReduceMotion = useReducedMotion()
 
