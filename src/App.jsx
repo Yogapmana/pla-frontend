@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams, Link } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useParams, Link } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { Analytics } from '@vercel/analytics/react'
@@ -32,7 +32,17 @@ const OnboardingLayout = lazy(() => import('./components/layout/OnboardingLayout
 const AgentLoadingScreen = lazy(() => import('./pages/Onboarding/AgentLoadingScreen'))
 const Landing = lazy(() => import('./pages/Landing'))
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,        // data fresh 1 menit → navigasi tidak refetch
+      gcTime: 10 * 60_000,      // cache 10 menit
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      retry: 1,
+    },
+  },
+})
 
 function RootRedirect() {
   const { isAuthenticated } = useAuthStore()
@@ -64,42 +74,36 @@ function SessionGuard({ children }) {
   const { isAuthenticated } = useAuthStore()
   const activeSession = useLearningStore((s) => s.activeSession)
   const setActiveSession = useLearningStore((s) => s.setActiveSession)
-  const { data: fetchedSession, isLoading } = useActiveSession({ enabled: isAuthenticated })
+  const token = typeof window !== 'undefined' ? window.localStorage.getItem('pla_token') : null
+  const canFetch = isAuthenticated || !!token
+  // Keep previous session visible while revalidating — avoids full-page loader on every nav
+  const { data: fetchedSession, isLoading, isFetching } = useActiveSession({
+    enabled: canFetch,
+  })
   const location = useLocation()
-  const [isRestoring, setIsRestoring] = React.useState(true)
 
   React.useEffect(() => {
-    if (fetchedSession && !activeSession) {
+    if (fetchedSession && (!activeSession || activeSession.id !== fetchedSession.id)) {
       setActiveSession(fetchedSession)
     }
   }, [fetchedSession, activeSession, setActiveSession])
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsRestoring(false)
-    }, 200)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (isRestoring) {
-    return <PageLoader />
+  if (!isAuthenticated && !token) {
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  if (!isAuthenticated) {
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('pla_token') : null
-    if (!token) {
-      return <Navigate to="/login" state={{ from: location }} replace />
-    }
-  }
-
-  if (isLoading) {
-    return <PageLoader />
-  }
-
+  // Only block on FIRST load when we have no cached/store session yet
   const hasSession = !!fetchedSession || !!activeSession
+  if ((isLoading || isFetching) && !hasSession) {
+    return <PageLoader fullScreen showLogo />
+  }
 
   if (fetchedSession?.status === 'processing') {
-    return <AgentLoadingScreen sessionId={fetchedSession.id} />
+    return (
+      <Suspense fallback={<PageLoader fullScreen showLogo />}>
+        <AgentLoadingScreen sessionId={fetchedSession.id} />
+      </Suspense>
+    )
   }
 
   if (location.pathname === '/onboarding' && hasSession) {
@@ -121,11 +125,30 @@ function SessionGuard({ children }) {
   return children
 }
 
-function ProtectedApp({ children }) {
+/** Persistent shell: SessionGuard + AppLayout stay mounted across page navigations. */
+function AppShell() {
   return (
-    <ProtectedRoute>
-      <AppLayout>{children}</AppLayout>
-    </ProtectedRoute>
+    <SessionGuard>
+      <ProtectedRoute>
+        <AppLayout>
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </AppLayout>
+      </ProtectedRoute>
+    </SessionGuard>
+  )
+}
+
+function OnboardingShell() {
+  return (
+    <SessionGuard>
+      <Suspense fallback={<PageLoader fullScreen showLogo />}>
+        <OnboardingLayout>
+          <Outlet />
+        </OnboardingLayout>
+      </Suspense>
+    </SessionGuard>
   )
 }
 
@@ -153,163 +176,92 @@ function AppRoutes() {
   }, [location]);
 
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
-        <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
-        <Route path="/verify-email" element={<ErrorBoundary><VerifyEmail /></ErrorBoundary>} />
-        <Route path="/forgot-password" element={<ErrorBoundary><ForgotPassword /></ErrorBoundary>} />
-        <Route path="/reset-password" element={<ErrorBoundary><ResetPassword /></ErrorBoundary>} />
-        <Route
-          path="/onboarding"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <OnboardingLayout>
-                  <Onboarding />
-                </OnboardingLayout>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Dashboard />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/curriculum"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Curriculum />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route path="/curriculum/:topicId" element={<CurriculumRedirect />} />
-        <Route path="/modules" element={<Navigate to="/curriculum" replace />} />
-        <Route
-          path="/module/:topicId"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Module />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/module/:topicId/remedial"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Remedial />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/module/:topicId/deep-dive"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <DeepDive />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/chat"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Chat />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/chat/:topicId"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Chat />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/quiz/:topicId"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Quiz />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/progress"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <QuizHistory />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/progress/topic/:topicId"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <QuizHistoryByTopic />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ErrorBoundary>
-              <SessionGuard>
-                <ProtectedApp>
-                  <Settings />
-                </ProtectedApp>
-              </SessionGuard>
-            </ErrorBoundary>
-          }
-        />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Suspense>
+    <Routes>
+      {/* Public — Suspense lokal, full-screen loader OK */}
+      <Route
+        path="/"
+        element={
+          <Suspense fallback={<PageLoader fullScreen showLogo />}>
+            <Landing />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={<PageLoader fullScreen showLogo />}>
+            <ErrorBoundary><Login /></ErrorBoundary>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <Suspense fallback={<PageLoader fullScreen showLogo />}>
+            <ErrorBoundary><Register /></ErrorBoundary>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/verify-email"
+        element={
+          <Suspense fallback={<PageLoader fullScreen showLogo />}>
+            <ErrorBoundary><VerifyEmail /></ErrorBoundary>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <Suspense fallback={<PageLoader fullScreen showLogo />}>
+            <ErrorBoundary><ForgotPassword /></ErrorBoundary>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <Suspense fallback={<PageLoader fullScreen showLogo />}>
+            <ErrorBoundary><ResetPassword /></ErrorBoundary>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/onboarding"
+        element={
+          <ErrorBoundary>
+            <OnboardingShell />
+          </ErrorBoundary>
+        }
+      >
+        <Route index element={<Onboarding />} />
+      </Route>
+
+      {/* Authenticated — one shell for all pages (no remount sidebar/topbar) */}
+      <Route
+        element={
+          <ErrorBoundary>
+            <AppShell />
+          </ErrorBoundary>
+        }
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/curriculum" element={<Curriculum />} />
+        <Route path="/module/:topicId" element={<Module />} />
+        <Route path="/module/:topicId/remedial" element={<Remedial />} />
+        <Route path="/module/:topicId/deep-dive" element={<DeepDive />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/chat/:topicId" element={<Chat />} />
+        <Route path="/quiz/:topicId" element={<Quiz />} />
+        <Route path="/progress" element={<QuizHistory />} />
+        <Route path="/progress/topic/:topicId" element={<QuizHistoryByTopic />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
+
+      <Route path="/curriculum/:topicId" element={<CurriculumRedirect />} />
+      <Route path="/modules" element={<Navigate to="/curriculum" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   )
 }
 

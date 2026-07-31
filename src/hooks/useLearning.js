@@ -60,6 +60,9 @@ export function useActiveSession(options = {}) {
       return fallback
     },
     enabled: options.enabled !== false,
+    staleTime: 2 * 60_000,
+    // Show previous session while background revalidate — no blank flash
+    placeholderData: () => useLearningStore.getState().activeSession ?? undefined,
   })
 }
 
@@ -67,6 +70,7 @@ export function useAllSessions() {
   return useQuery({
     queryKey: ['sessions'],
     queryFn: getSessions,
+    staleTime: 2 * 60_000,
   })
 }
 
@@ -75,6 +79,7 @@ export function useCurriculum(sessionId) {
     queryKey: ['curriculum', sessionId],
     queryFn: () => getCurriculum(sessionId),
     enabled: !!sessionId,
+    staleTime: 5 * 60_000,
   })
 }
 
@@ -83,6 +88,7 @@ export function useTopics(sessionId) {
     queryKey: ['topics', sessionId],
     queryFn: () => getTopics(sessionId),
     enabled: !!sessionId,
+    staleTime: 60_000,
   })
 }
 
@@ -91,6 +97,7 @@ export function useModule(sessionId, topicId) {
     queryKey: ['module', topicId],
     queryFn: () => getModule(sessionId, topicId),
     enabled: !!sessionId && !!topicId,
+    staleTime: 5 * 60_000,
   })
 }
 

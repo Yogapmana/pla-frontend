@@ -44,42 +44,43 @@ export default function GreetingHero({ username = 'Pelajar', streak = 0, xp = 0 
           : (currentProgress / range) * 100);
 
   return (
-    <div className="page-header">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="page-title">
-            {greeting}, {username}
+    <div className="page-header min-w-0">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1 min-w-0">
+          <h1 className="page-title break-words">
+            <span className="block sm:inline">{greeting},</span>{' '}
+            <span className="break-words">{username}</span>
           </h1>
           <p className="page-subtitle">
             {t('dashboard.ready', 'Siap untuk melanjutkan petualangan belajarmu hari ini?')}
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2.5 bg-tertiary/10 px-4 py-2.5 rounded-xl border border-tertiary/20">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-2.5 bg-tertiary/10 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-tertiary/20">
             <motion.div
               initial={shouldReduceMotion ? { scale: 1 } : { scale: 0.8 }}
               animate={shouldReduceMotion ? { scale: 1 } : { scale: [0.8, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 2, repeatType: 'reverse' }}
             >
-              <Flame className="w-5 h-5 text-tertiary fill-tertiary" />
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-tertiary fill-tertiary" />
             </motion.div>
             <div>
               <div className="text-[10px] font-label uppercase tracking-wider text-tertiary/80 leading-none">
                 {t('dashboard.streak', 'Streak')}
               </div>
-              <div className="text-lg font-bold text-tertiary leading-tight">
+              <div className="text-base sm:text-lg font-bold text-tertiary leading-tight">
                 <CountUp value={streak} /> {t('dashboard.days', 'Hari')}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 bg-surface px-4 py-2.5 rounded-xl border border-[var(--border)] shadow-warm-xs">
-            <div>
+          <div className="flex items-center gap-2 sm:gap-2.5 bg-surface px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-[var(--border)] shadow-warm-xs min-w-0 max-w-full">
+            <div className="min-w-0">
               <div className="text-[10px] font-label uppercase tracking-wider text-secondary leading-none">
                 {t('dashboard.level', 'Level')} {levelInfo.level}
               </div>
-              <div className="text-sm font-semibold text-primary leading-tight">
+              <div className="text-xs sm:text-sm font-semibold text-primary leading-tight truncate max-w-[9rem] sm:max-w-none">
                 {levelInfo.name}
               </div>
             </div>

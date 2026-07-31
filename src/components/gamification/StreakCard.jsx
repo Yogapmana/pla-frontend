@@ -51,17 +51,17 @@ export default function StreakCard() {
   })();
 
   return (
-    <div className="card-base p-5 md:p-6">
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+    <div className="card-base p-4 sm:p-5 md:p-6 min-w-0 overflow-hidden">
+      <div className="flex items-start justify-between gap-2 sm:gap-3 mb-4 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary shrink-0">
             <Flame size={18} fill="currentColor" strokeWidth={1.5} />
           </div>
-          <div>
-            <h2 className="font-display font-semibold text-primary text-sm">
+          <div className="min-w-0">
+            <h2 className="font-display font-semibold text-primary text-sm truncate">
               {t('dashboard.learning_consistency', 'Konsistensi Belajar')}
             </h2>
-            <p className="text-[11px] text-secondary/70 font-label">
+            <p className="text-[11px] text-secondary/70 font-label truncate">
               {lastLoginLabel
                 ? `${t('dashboard.last_login', 'Login terakhir: ')}${lastLoginLabel}`
                 : t('dashboard.login_learning_activity', 'Aktivitas login & belajar')}
@@ -70,7 +70,7 @@ export default function StreakCard() {
         </div>
         <Link
           to="/progress"
-          className="inline-flex items-center gap-1 text-xs font-label font-semibold text-tertiary hover:text-tertiary-dark transition-colors"
+          className="inline-flex items-center gap-1 text-xs font-label font-semibold text-tertiary hover:text-tertiary-dark transition-colors shrink-0"
         >
           {t('dashboard.history', 'Riwayat')}
           <ArrowRight size={12} />

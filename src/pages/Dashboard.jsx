@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils'
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { getDailyStudyTime } from '../api/progress';
 import { useAuthStore } from '../stores/authStore';
 import { useLearningStore } from '../stores/learningStore';
-import { getCurriculum, getTopics } from '../api/learning';
-import { getQuizHistory } from '../api/quiz';
+import { useCurriculum, useTopics } from '../hooks/useLearning';
+import { useQuizHistory } from '../hooks/useQuiz';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -120,49 +120,34 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
 
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
-    curriculum: null,
-    topics: [],
-    quizHistory: [],
-  });
   const [showFeedback, setShowFeedback] = useState(true);
+  const sessionId = activeSession?.id;
 
-  useEffect(() => {
-    async function loadDashboardData() {
-      setLoading(true);
-      try {
-        if (activeSession?.id) {
-          const [currData, topicsData, quizData] = await Promise.all([
-            getCurriculum(activeSession.id).catch(() => null),
-            getTopics(activeSession.id).catch(() => []),
-            getQuizHistory(activeSession.id).catch(() => []),
-          ]);
+  // Shared React Query cache — navigasi ulang tidak refetch dalam staleTime
+  const { data: curriculum, isLoading: loadingCurriculum } = useCurriculum(sessionId);
+  const { data: topicsRaw, isLoading: loadingTopics } = useTopics(sessionId);
+  const { data: quizHistoryRaw, isLoading: loadingQuiz } = useQuizHistory(sessionId);
 
-          setData({
-            curriculum: currData || null,
-            topics: Array.isArray(topicsData) ? topicsData : (topicsData?.topics || []),
-            quizHistory: Array.isArray(quizData) ? quizData : [],
-          });
-        }
-      } catch {
-        setData({ curriculum: null, topics: [], quizHistory: [] });
-      } finally {
-        setLoading(false);
-      }
-    }
+  const topics = useMemo(() => {
+    if (!topicsRaw) return [];
+    return Array.isArray(topicsRaw) ? topicsRaw : (topicsRaw?.topics || []);
+  }, [topicsRaw]);
 
-    loadDashboardData();
-  }, [activeSession]);
+  const quizHistory = useMemo(
+    () => (Array.isArray(quizHistoryRaw) ? quizHistoryRaw : []),
+    [quizHistoryRaw],
+  );
 
   const { data: rawStudyTime = [] } = useQuery({
-    queryKey: ['daily-study-time', activeSession?.id],
-    queryFn: () => getDailyStudyTime(activeSession?.id, 30),
-    enabled: !!activeSession?.id,
+    queryKey: ['daily-study-time', sessionId],
+    queryFn: () => getDailyStudyTime(sessionId, 30),
+    enabled: !!sessionId,
     staleTime: 60_000,
   });
 
-  const { curriculum, topics, quizHistory } = data;
+  // Skeleton only on first load (no cached data). Revisit shows content immediately.
+  const loading = !!sessionId && (loadingTopics || loadingQuiz || loadingCurriculum)
+    && topics.length === 0 && quizHistory.length === 0 && !curriculum;
 
   const completedTopicsCount = topics.filter(t => t.status === 'completed').length;
 
@@ -287,7 +272,7 @@ export default function Dashboard() {
       variants={shouldReduceMotion ? { hidden: {}, show: {} } : stagger}
       initial="hidden"
       animate="show"
-      className="max-w-6xl mx-auto space-y-6 relative pb-8 md:pb-12"
+      className="max-w-6xl mx-auto space-y-4 sm:space-y-6 relative pb-8 md:pb-12 min-w-0 w-full"
     >
       {/* Decorative oversized serif numeral — the "dashboard page mark" */}
       <span

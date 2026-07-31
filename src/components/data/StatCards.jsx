@@ -163,20 +163,20 @@ export function StatCard({ label, value, subtext, icon, sparkline, trend, color 
       {...tapProps}
       role="group"
       aria-label={`${label}: ${value}${subtext ? `. ${subtext}` : ''}`}
-      className="card-base card-hover card-interactive p-5 relative overflow-hidden"
+      className="card-base card-hover card-interactive p-3.5 sm:p-5 relative overflow-hidden min-w-0"
     >
       {/* Decorative oversized corner numeral — adds the editorial layer */}
       <span
         aria-hidden="true"
-        className="absolute -top-3 -right-1 font-display text-[3.5rem] font-black italic text-primary/[0.04] leading-none pointer-events-none select-none"
+        className="absolute -top-3 -right-1 font-display text-[2.5rem] sm:text-[3.5rem] font-black italic text-primary/[0.04] leading-none pointer-events-none select-none"
       >
         {String(typeof value === 'number' ? value : value).slice(0, 2)}
       </span>
 
-      <div className="flex items-start justify-between gap-3 relative z-10">
-        <div className="space-y-2 min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-xs font-label uppercase tracking-wider text-secondary">
+      <div className="flex items-start justify-between gap-2 sm:gap-3 relative z-10">
+        <div className="space-y-1.5 sm:space-y-2 min-w-0 flex-1 overflow-hidden">
+          <div className="flex items-center justify-between gap-1.5 min-w-0">
+            <div className="text-[10px] sm:text-xs font-label uppercase tracking-wider text-secondary truncate">
               {label}
             </div>
             {trend != null && <TrendArrow delta={trend} />}
@@ -184,27 +184,29 @@ export function StatCard({ label, value, subtext, icon, sparkline, trend, color 
           <div
             aria-hidden="true"
             className={cn(
-              'text-3xl font-display font-bold leading-none tabular-nums',
+              'text-2xl sm:text-3xl font-display font-bold leading-none tabular-nums break-all',
               color === 'tertiary' ? 'text-gradient-tertiary' : 'text-primary'
             )}
           >
             {typeof value === 'number' ? <CountUp value={value} /> : value}
           </div>
           {subtext && (
-            <div className="text-xs text-secondary/70 font-medium truncate">
+            <div className="text-[11px] sm:text-xs text-secondary/70 font-medium truncate">
               {subtext}
             </div>
           )}
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0">
+        <div className="flex flex-col items-end gap-1.5 sm:gap-2 shrink-0">
           <div
             aria-hidden="true"
-            className={cn('w-10 h-10 rounded-xl flex items-center justify-center', iconBg)}
+            className={cn('w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center', iconBg)}
           >
-            <IconComponent className="w-5 h-5" />
+            <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           {sparkline && sparkline.length > 1 && (
-            <Sparkline data={sparkline} color={color} height={28} />
+            <div className="hidden min-[400px]:block scale-90 sm:scale-100 origin-top-right">
+              <Sparkline data={sparkline} color={color} height={28} />
+            </div>
           )}
         </div>
       </div>
@@ -221,8 +223,11 @@ export function StatCards({ stats = [], className }) {
       initial="hidden"
       animate="show"
       className={cn(
-        'grid grid-cols-2 gap-4',
-        stats.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4',
+        'grid gap-3 sm:gap-4',
+        // 3 cards: stack on narrow phones, 2-col mid, 3-col desktop
+        stats.length === 3
+          ? 'grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-3'
+          : 'grid-cols-2 lg:grid-cols-4',
         className
       )}
     >

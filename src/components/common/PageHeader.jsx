@@ -28,8 +28,8 @@ function PageHeader({
 
   const sizing =
     size === 'compact'
-      ? { wrap: 'mb-4', title: 'text-xl', subtitle: 'text-sm' }
-      : { wrap: 'mb-7', title: 'text-3xl', subtitle: 'text-sm' };
+      ? { wrap: 'mb-4', title: 'text-lg sm:text-xl', subtitle: 'text-sm' }
+      : { wrap: 'mb-5 sm:mb-7', title: 'text-2xl sm:text-3xl', subtitle: 'text-sm' };
 
   const titleMotion = shouldReduceMotion
     ? {}
@@ -68,7 +68,7 @@ function PageHeader({
             <motion.h1
               {...titleMotion}
               className={cn(
-                'font-display font-bold tracking-tight text-primary leading-tight',
+                'font-display font-bold tracking-tight text-primary leading-tight break-words min-w-0',
                 sizing.title
               )}
             >

@@ -60,7 +60,7 @@ export default function SessionSwitcher({ className }) {
         aria-expanded={open}
         aria-label={t('session_switcher.label', 'Sesi belajar aktif')}
         className={cn(
-          'group flex max-w-[11rem] items-center gap-1.5 rounded-full border px-2.5 py-1.5 sm:max-w-[14rem] sm:gap-2 sm:px-3',
+          'group flex max-w-[9.5rem] items-center gap-1.5 rounded-full border px-2 py-1.5 min-[380px]:max-w-[11rem] sm:max-w-[14rem] sm:gap-2 sm:px-3',
           'border-tertiary/20 bg-surface text-left shadow-warm-xs',
           'transition-all duration-150',
           'hover:border-tertiary/35 hover:bg-tertiary/[0.04] hover:shadow-warm-sm',

@@ -126,18 +126,18 @@ export default function LearningAnalytics({ topics, quizHistory, sessionId }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
 
       {/* Chart 1: Daily Study Time (stacked bar: reading + quiz) */}
-      <div className="card-base p-6 flex flex-col h-full">
-        <h3 className="text-lg font-display font-bold text-primary mb-1">
+      <div className="card-base p-4 sm:p-6 flex flex-col h-full min-w-0 overflow-hidden">
+        <h3 className="text-base sm:text-lg font-display font-bold text-primary mb-1">
           {t('analytics.study_time_title', 'Daily Study Time')}
         </h3>
-        <p className="text-sm text-secondary mb-6">
+        <p className="text-xs sm:text-sm text-secondary mb-4 sm:mb-6">
           {t('analytics.study_time_desc', 'Duration reading modules and taking quizzes (last 7 active days)')}
         </p>
 
-        <div className="flex-1 w-full min-h-[250px]">
+        <div className="flex-1 w-full min-h-[220px] sm:min-h-[250px] min-w-0">
           {studyTimeData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={studyTimeData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
@@ -200,15 +200,15 @@ export default function LearningAnalytics({ topics, quizHistory, sessionId }) {
       </div>
 
       {/* Chart 2: Mastery Progress */}
-      <div className="card-base p-6 flex flex-col h-full">
-        <h3 className="text-lg font-display font-bold text-primary mb-1">
+      <div className="card-base p-4 sm:p-6 flex flex-col h-full min-w-0 overflow-hidden">
+        <h3 className="text-base sm:text-lg font-display font-bold text-primary mb-1">
           {t('analytics.mastery_progress_title', 'Understanding Progress')}
         </h3>
-        <p className="text-sm text-secondary mb-6">
+        <p className="text-xs sm:text-sm text-secondary mb-4 sm:mb-6">
           {t('analytics.mastery_progress_desc', 'Mastery score and quiz results trend (last 10 topics)')}
         </p>
 
-        <div className="flex-1 w-full min-h-[250px]">
+        <div className="flex-1 w-full min-h-[220px] sm:min-h-[250px] min-w-0">
           {masteryData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={masteryData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>

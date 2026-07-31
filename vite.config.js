@@ -33,6 +33,29 @@ export default defineConfig({
     // the alias above resolves it.
     exclude: ['web-worker'],
   },
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('recharts') || id.includes('d3-')) return 'charts'
+          if (id.includes('@xyflow') || id.includes('elkjs') || id.includes('markmap') || id.includes('mermaid')) {
+            return 'mindmap'
+          }
+          if (id.includes('framer-motion')) return 'motion'
+          if (id.includes('@tanstack')) return 'query'
+          if (id.includes('react-dom') || id.includes('react-router') || id.includes('/react/')) {
+            return 'react-vendor'
+          }
+          if (id.includes('lucide-react') || id.includes('date-fns') || id.includes('i18next')) {
+            return 'ui-utils'
+          }
+        },
+      },
+    },
+  },
   server: {
     allowedHosts: true,
     proxy: {

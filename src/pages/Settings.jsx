@@ -144,20 +144,20 @@ function FieldRow({ icon: Icon, label, value, muted = false, action }) {
 
 function SettingSwitch({ icon: Icon, label, description, checked, onChange }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border/60 bg-bg-secondary/40 p-4 transition-colors hover:border-tertiary/25">
-      <div className="flex min-w-0 items-center gap-3">
+    <label className="flex cursor-pointer items-start sm:items-center justify-between gap-3 sm:gap-4 rounded-xl border border-border/60 bg-bg-secondary/40 p-3.5 sm:p-4 transition-colors hover:border-tertiary/25">
+      <div className="flex min-w-0 items-start sm:items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tertiary/10 text-tertiary">
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-primary">{label}</p>
-          <p className="mt-0.5 text-xs text-secondary">{description}</p>
+          <p className="text-sm font-semibold text-primary leading-snug">{label}</p>
+          <p className="mt-0.5 text-xs text-secondary leading-relaxed">{description}</p>
         </div>
       </div>
       <Switch
         checked={checked}
         onCheckedChange={onChange}
-        className="shrink-0"
+        className="shrink-0 mt-0.5 sm:mt-0"
         aria-label={label}
       />
     </label>
@@ -170,7 +170,7 @@ function SectionCard({ eyebrow, title, subtitle, children, footer }) {
       variants={fadeUp}
       initial="hidden"
       animate="visible"
-      className="card-base p-6 md:p-7 relative overflow-hidden"
+      className="card-base p-4 sm:p-6 md:p-7 relative overflow-hidden min-w-0"
     >
       <div className="relative">
         <div className="mb-1">
@@ -414,7 +414,7 @@ export default function Settings() {
   const sections = getSections(t)
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-0 relative">
+    <div className="mx-auto w-full max-w-5xl relative min-w-0">
       <span
         aria-hidden="true"
         className="absolute -top-2 -right-2 deco-num deco-num-secondary hidden md:block"
@@ -433,7 +433,7 @@ export default function Settings() {
         subtitle={t('settings.desc', 'Kelola profil, preferensi belajar, tampilan, dan data progresmu.')}
       />
 
-      <div className="flex gap-6 mt-6">
+      <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:gap-6">
         {/* Desktop nav rail */}
         <nav className="hidden lg:flex flex-col gap-1 w-56 shrink-0">
           <div className="mb-3">
@@ -473,8 +473,8 @@ export default function Settings() {
           })}
         </nav>
 
-        {/* Mobile horizontal nav */}
-        <div className="lg:hidden -mx-4 px-4 sm:mx-0 sm:px-0 mb-4 flex gap-2 overflow-x-auto pb-2 w-full">
+        {/* Mobile horizontal nav — full width row above content */}
+        <div className="lg:hidden -mx-1 flex gap-2 overflow-x-auto overscroll-x-contain pb-1 scrollbar-none">
           {sections.map((section) => {
             const Icon = section.icon
             const isActive = activeSection === section.id
@@ -484,9 +484,9 @@ export default function Settings() {
                 type="button"
                 onClick={() => setActiveSection(section.id)}
                 className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-colors font-label shrink-0',
+                  'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-colors font-label shrink-0',
                   isActive
-                    ? 'bg-tertiary/[0.08] text-tertiary'
+                    ? 'bg-tertiary/[0.08] text-tertiary border border-tertiary/20'
                     : 'text-secondary hover:bg-bg-secondary/60 hover:text-primary border border-border/60'
                 )}
               >
@@ -498,7 +498,7 @@ export default function Settings() {
         </div>
 
         {/* Sections */}
-        <div className="flex-1 space-y-5 min-w-0">
+        <div className="w-full flex-1 space-y-5 min-w-0">
           {activeSection === 'profil' && (
             <SectionCard
               eyebrow={sections[0].eyebrow}
@@ -616,10 +616,10 @@ export default function Settings() {
                           onValueChange={handleLanguageChange}
                           disabled={isSavingLanguage}
                         >
-                          <SelectTrigger className="h-9 w-full max-w-xs rounded-lg border-border bg-surface text-sm">
+                          <SelectTrigger className="h-9 w-full max-w-xs rounded-lg border-border bg-surface text-sm text-primary shadow-warm-xs">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-surface border-border shadow-warm-md z-[80]">
                             <SelectItem value="id">Bahasa Indonesia</SelectItem>
                             <SelectItem value="en">English</SelectItem>
                           </SelectContent>
@@ -676,7 +676,7 @@ export default function Settings() {
                       <li
                         key={session.id}
                         className={cn(
-                          'group flex items-start gap-3 rounded-xl border bg-bg-secondary/40 p-4 transition-colors',
+                          'group flex items-start gap-2.5 sm:gap-3 rounded-xl border bg-bg-secondary/40 p-3.5 sm:p-4 transition-colors min-w-0',
                           isActive
                             ? 'border-tertiary/30 bg-tertiary/[0.04]'
                             : 'border-border/60 hover:border-tertiary/25'
@@ -685,9 +685,9 @@ export default function Settings() {
                         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tertiary/10 text-tertiary">
                           <BookOpen className="h-4 w-4" />
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className="min-w-0 flex-1 overflow-hidden">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="truncate text-sm font-semibold text-primary">
+                            <p className="break-words text-sm font-semibold text-primary">
                               {session.topic || t('settings.untitled_session', 'Sesi tanpa judul')}
                             </p>
                             <span

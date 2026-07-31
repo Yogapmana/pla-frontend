@@ -114,19 +114,19 @@ export default function QuizHistory() {
   }, [attempts])
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto min-w-0 w-full">
       {/* ─── Hero Section ─── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-        className="relative rounded-3xl p-6 md:p-8 mb-8 overflow-hidden bg-gradient-to-br from-surface-1 via-surface-0 to-surface-1 border border-border-subtle"
+        className="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 overflow-hidden bg-gradient-to-br from-surface-1 via-surface-0 to-surface-1 border border-border-subtle"
       >
         {/* Decorative blobs */}
         <div aria-hidden="true" className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-tertiary/[0.04] blur-3xl pointer-events-none" />
         <div aria-hidden="true" className="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-warning/[0.05] blur-3xl pointer-events-none" />
 
-        <div className="relative z-10">
+        <div className="relative z-10 min-w-0">
           <PageHeader
             title={t('quiz.history_title', 'Riwayat Kuis')}
             subtitle={t('quiz.history_desc', 'Semua kuis yang pernah Anda kerjakan, dikelompokkan per topik.')}
@@ -135,7 +135,7 @@ export default function QuizHistory() {
         </div>
 
         {!isLoading && stats.total > 0 && (
-          <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+          <div className="relative z-10 grid grid-cols-2 gap-2.5 sm:gap-3 mt-2">
             <StatCard
               icon={HelpCircle}
               label={t('quiz.total_quizzes', 'Total Kuis')}
@@ -205,13 +205,13 @@ function StatCard({ icon: Icon, label, value, tone = 'tertiary' }) {
   }
 
   return (
-    <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-0/60 backdrop-blur-sm border border-border-subtle/60 hover:border-border-subtle transition-colors">
-      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', toneClasses[tone])}>
-        <Icon size={18} />
+    <div className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface-0/60 backdrop-blur-sm border border-border-subtle/60 hover:border-border-subtle transition-colors min-w-0">
+      <div className={cn('w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0', toneClasses[tone])}>
+        <Icon size={17} />
       </div>
-      <div className="min-w-0">
-        <p className="text-[11px] text-secondary font-label uppercase tracking-wider">{label}</p>
-        <p className="font-display font-bold text-xl text-primary tabular-nums leading-tight mt-0.5">
+      <div className="min-w-0 overflow-hidden">
+        <p className="text-[10px] sm:text-[11px] text-secondary font-label uppercase tracking-wider truncate">{label}</p>
+        <p className="font-display font-bold text-lg sm:text-xl text-primary tabular-nums leading-tight mt-0.5">
           {value}
         </p>
       </div>
@@ -234,51 +234,53 @@ function TopicGroupCard({ group, index, t }) {
   const latestDate = latest?.created_at
 
   return (
-    <article className="group relative card-base overflow-hidden hover:shadow-warm-sm transition-all duration-300">
-      <div className="flex items-center gap-4 p-5">
-        {/* Number badge */}
-        <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-tertiary/10 to-tertiary/5 flex items-center justify-center shrink-0 border border-tertiary/10">
-          <span className="font-display font-bold text-lg text-tertiary tabular-nums">{num}</span>
-        </div>
+    <article className="group relative card-base overflow-hidden hover:shadow-warm-sm transition-all duration-300 min-w-0">
+      <div className="flex flex-col gap-3 p-4 sm:p-5 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
+          {/* Number badge */}
+          <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-tertiary/10 to-tertiary/5 flex items-center justify-center shrink-0 border border-tertiary/10">
+            <span className="font-display font-bold text-base sm:text-lg text-tertiary tabular-nums">{num}</span>
+          </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h2 className="font-display font-semibold text-base text-primary leading-tight truncate">
-            {group.topic_title}
-          </h2>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-secondary font-label">
-            <span className="inline-flex items-center gap-1">
-              <Sparkles size={11} className="text-tertiary" />
-              {group.attempts.length} {t('quiz.attempts', 'percobaan')}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Trophy size={11} />
-              {t('quiz.best_prefix', 'Terbaik:')} {best}%
-            </span>
-            {trend && TrendIcon && (
-              <span className={cn('inline-flex items-center gap-1', trend.color)}>
-                <TrendIcon size={11} />
-                {t(trend.label, trend.defaultLabel)}
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h2 className="font-display font-semibold text-sm sm:text-base text-primary leading-snug break-words">
+              {group.topic_title}
+            </h2>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-secondary font-label">
+              <span className="inline-flex items-center gap-1">
+                <Sparkles size={11} className="text-tertiary shrink-0" />
+                {group.attempts.length} {t('quiz.attempts', 'percobaan')}
               </span>
-            )}
-            {latestDate && (
-              <span className="inline-flex items-center gap-1 text-secondary/70">
-                <Clock size={11} />
-                {formatDate(latestDate)}
+              <span className="inline-flex items-center gap-1">
+                <Trophy size={11} className="shrink-0" />
+                {t('quiz.best_prefix', 'Terbaik:')} {best}%
               </span>
-            )}
+              {trend && TrendIcon && (
+                <span className={cn('inline-flex items-center gap-1', trend.color)}>
+                  <TrendIcon size={11} className="shrink-0" />
+                  {t(trend.label, trend.defaultLabel)}
+                </span>
+              )}
+              {latestDate && (
+                <span className="inline-flex items-center gap-1 text-secondary/70">
+                  <Clock size={11} className="shrink-0" />
+                  {formatDate(latestDate)}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right side — badge + link */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* Actions — full width on mobile, side-by-side on sm+ */}
+        <div className="flex items-center gap-2 sm:gap-2.5 sm:shrink-0 pl-14 sm:pl-0">
           <StatusBadge variant={latestPill.variant}>
             {latestPill.label === '—' ? '—' : t(latestPill.label, latestPill.defaultLabel)}
           </StatusBadge>
           <Link
             to={`/progress/topic/${encodeURIComponent(group.topic_id)}`}
             className={cn(
-              'inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-label font-semibold',
+              'inline-flex items-center justify-center gap-1.5 flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-sm font-label font-semibold',
               'bg-surface-1 text-primary border border-border-subtle',
               'hover:bg-tertiary hover:text-white hover:border-tertiary',
               'transition-all duration-200 shadow-warm-xs group-hover:shadow-warm-sm'
@@ -291,7 +293,7 @@ function TopicGroupCard({ group, index, t }) {
       </div>
 
       {/* Score bar visualization */}
-      <div className="px-5 pb-4">
+      <div className="px-4 sm:px-5 pb-4">
         <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
           <div
             className={cn(

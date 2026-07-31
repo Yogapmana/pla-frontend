@@ -66,17 +66,17 @@ export default function XpCard() {
   const levelIcon = LEVEL_ICONS[level_info.level] || LEVEL_ICONS[10];
 
   return (
-    <div className="card-base p-5 md:p-6">
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-warning/10 flex items-center justify-center text-warning">
+    <div className="card-base p-4 sm:p-5 md:p-6 min-w-0 overflow-hidden">
+      <div className="flex items-start justify-between gap-2 sm:gap-3 mb-4 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-warning/10 flex items-center justify-center text-warning shrink-0">
             <Star size={18} fill="currentColor" strokeWidth={1.5} />
           </div>
-          <div>
-            <h2 className="font-display font-semibold text-primary text-sm">
+          <div className="min-w-0">
+            <h2 className="font-display font-semibold text-primary text-sm truncate">
               {t('dashboard.level_and_xp', 'Level & XP')}
             </h2>
-            <p className="text-[11px] text-secondary/70 font-label">
+            <p className="text-[11px] text-secondary/70 font-label truncate">
               {t('dashboard.xp_from_mastery', 'XP dari mastery topik')}
             </p>
           </div>

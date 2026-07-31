@@ -42,6 +42,7 @@ export function useQuizHistory(sessionId) {
     queryKey: ['quiz-results', sessionId],
     queryFn: () => getQuizHistory(sessionId),
     enabled: !!sessionId,
+    staleTime: 60_000,
   })
 }
 
@@ -50,6 +51,7 @@ export function useQuizHistoryByTopic(sessionId, topicId) {
     queryKey: ['quiz-results-by-topic', sessionId, topicId],
     queryFn: () => getQuizHistoryByTopic(sessionId, topicId),
     enabled: !!sessionId && !!topicId,
+    staleTime: 60_000,
   })
 }
 
@@ -58,5 +60,6 @@ export function useQuizAttemptDetail(attemptId) {
     queryKey: ['quiz-attempt', attemptId],
     queryFn: () => getQuizAttemptDetail(attemptId),
     enabled: !!attemptId,
+    staleTime: 5 * 60_000,
   })
 }

@@ -55,6 +55,27 @@ const NAV_ITEMS = [
   { labelKey: 'sidebar.settings', icon: Settings, path: '/settings', section: 'lainnya' },
 ];
 
+/** Prefetch lazy page chunk on hover/focus so click feels instant. */
+const ROUTE_PREFETCH = {
+  '/dashboard': () => import('../../pages/Dashboard'),
+  '/curriculum': () => import('../../pages/Curriculum'),
+  '/chat': () => import('../../pages/Chat'),
+  '/progress': () => import('../../pages/QuizHistory'),
+  '/settings': () => import('../../pages/Settings'),
+};
+
+const prefetchedRoutes = new Set();
+
+function prefetchRoute(path) {
+  if (prefetchedRoutes.has(path)) return;
+  const loader = ROUTE_PREFETCH[path];
+  if (!loader) return;
+  prefetchedRoutes.add(path);
+  loader().catch(() => {
+    prefetchedRoutes.delete(path);
+  });
+}
+
 const Sidebar = () => {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
@@ -343,6 +364,9 @@ function NavItemRow({ item, sidebarCollapsed }) {
       // user is on /curriculum and vice versa.
       end={item.path === '/chat' || item.path === '/curriculum'}
       aria-label={item.label}
+      onMouseEnter={() => prefetchRoute(item.path)}
+      onFocus={() => prefetchRoute(item.path)}
+      onTouchStart={() => prefetchRoute(item.path)}
       className={({ isActive }) =>
         cn(
           'relative flex items-center gap-3 rounded-xl transition-all duration-200 group',
