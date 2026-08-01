@@ -49,12 +49,12 @@ const ChatInput = ({
   const canSend = text.trim() && !isLoading
 
   return (
-    <div className="px-4 md:px-6 pt-2 pb-3 md:pb-4 bg-transparent">
-      <div className="max-w-3xl mx-auto">
+    <div className="px-4 pb-4 md:px-8 md:pb-5">
+      <div className="mx-auto max-w-4xl">
         <div
           className={cn(
-            'relative flex items-end gap-2 rounded-2xl border bg-surface px-3 py-2.5 sm:px-3.5 sm:py-3',
-            'shadow-warm-sm transition-all duration-200',
+            'relative flex items-end gap-2 rounded-[1.35rem] border bg-surface/95 px-3 py-2.5 sm:px-3.5 sm:py-3',
+            'shadow-[0_8px_30px_rgba(58,41,22,0.08)] transition-all duration-200',
             isFocused
               ? 'border-tertiary/45 ring-2 ring-tertiary/15 shadow-warm-md'
               : 'border-border-subtle hover:border-border'
@@ -74,7 +74,7 @@ const ChatInput = ({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading || isLoading}
                 className={cn(
-                  'mb-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl',
+                 'mb-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-transparent',
                   'text-secondary/60 hover:text-tertiary hover:bg-tertiary/8',
                   'disabled:opacity-50 transition-colors',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary/30'
@@ -115,7 +115,7 @@ const ChatInput = ({
             disabled={!canSend}
             aria-label={t('chat.send', 'Send message')}
             className={cn(
-              'mb-0.5 flex size-10 shrink-0 items-center justify-center rounded-full',
+               'mb-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl',
               'transition-all duration-200',
               canSend
                 ? 'bg-tertiary text-white shadow-warm-sm hover:bg-tertiary-light hover:scale-[1.03]'
@@ -131,7 +131,7 @@ const ChatInput = ({
         </div>
 
         <p className="mt-2 text-center text-[11px] font-label text-secondary/45">
-          {t('chat.input_hint', 'Enter to send · Shift+Enter for a new line')}
+           {t('chat.input_hint', 'Enter untuk mengirim · Shift+Enter untuk baris baru')}
         </p>
       </div>
     </div>

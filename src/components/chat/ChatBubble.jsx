@@ -41,7 +41,7 @@ const ChatBubble = ({
       }
 
   return (
-    <div className={cn('group flex flex-col mb-5', isAI ? 'items-start' : 'items-end')}>
+    <div className={cn('group mb-6 flex flex-col', isAI ? 'items-start' : 'items-end')}>
       <div className={cn('flex gap-3 max-w-[min(100%,42rem)]', isAI ? 'flex-row' : 'flex-row-reverse')}>
         {isAI && (
           <div className="mt-0.5 shrink-0">
@@ -53,10 +53,10 @@ const ChatBubble = ({
           <motion.div
             {...bubbleVariants}
             className={cn(
-              'px-4 py-3 shadow-warm-xs',
+               'px-4 py-3.5 shadow-warm-xs sm:px-5',
               isAI
-                ? 'max-w-full rounded-2xl rounded-tl-md border border-border-subtle bg-surface'
-                : 'max-w-full rounded-2xl rounded-tr-md bg-tertiary text-white shadow-warm-sm'
+                 ? 'max-w-full rounded-2xl rounded-tl-md border border-border-subtle/80 bg-surface shadow-[0_3px_12px_rgba(58,41,22,0.045)]'
+                 : 'max-w-full rounded-2xl rounded-tr-md bg-tertiary text-white shadow-[0_5px_16px_rgba(154,30,22,0.18)]'
             )}
           >
             <div

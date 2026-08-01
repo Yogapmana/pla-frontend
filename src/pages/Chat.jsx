@@ -225,21 +225,21 @@ export default function Chat() {
 
   const SidebarContent = () => (
     <>
-      <div className="flex h-14 shrink-0 items-center bg-transparent px-3 shadow-[inset_0_-1px_0_rgba(58,41,22,0.06)]">
+      <div className="flex h-[4.25rem] shrink-0 items-center bg-surface/45 px-3 shadow-[inset_0_-1px_0_rgba(58,41,22,0.06)]">
         <button
           type="button"
           onClick={() => {
             setActiveChatSessionId(null)
             setSidebarOpen(false)
           }}
-          className="group flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-danger/25 bg-danger/[0.04] px-3 text-[13px] font-medium text-danger transition-colors hover:bg-danger/10"
+          className="group flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-tertiary/25 bg-tertiary/[0.06] px-3 font-label text-[12px] font-semibold text-tertiary transition-all hover:-translate-y-px hover:bg-tertiary/10 hover:shadow-warm-xs"
         >
-          <Plus size={16} className="text-danger" />
+          <Plus size={16} />
           {t('chat.new_chat', 'New Conversation')}
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-transparent px-2.5 pb-3 pt-3">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-surface/20 px-2.5 pb-4 pt-4">
         {sessions.length === 0 ? (
           <ChatHistoryEmpty onTemplateClick={handleSendMessage} />
         ) : (
@@ -249,7 +249,7 @@ export default function Chat() {
             initial={shouldReduceMotion ? false : 'hidden'}
             animate="show"
           >
-            <p className="mb-2 px-2 text-[10px] font-label font-semibold uppercase tracking-widest text-secondary/45">
+            <p className="mb-2 px-2 text-[10px] font-label font-semibold uppercase tracking-[0.16em] text-secondary/55">
               {t('chat.recent', 'Recent')}
             </p>
             {sessions.map((session) => {
@@ -259,10 +259,10 @@ export default function Chat() {
                   key={session.id}
                   variants={shouldReduceMotion ? undefined : fadeUp}
                   className={cn(
-                    'group mb-0.5 flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2 transition-colors duration-150',
+                    'group mb-1 flex cursor-pointer items-center justify-between rounded-xl border border-transparent px-2.5 py-2.5 transition-all duration-150',
                     isActive
-                      ? 'bg-tertiary/8 text-primary font-medium'
-                      : 'text-secondary hover:bg-secondary/8 hover:text-primary'
+                      ? 'border-tertiary/15 bg-tertiary/[0.08] text-primary font-medium shadow-warm-xs'
+                      : 'text-secondary hover:border-border-subtle/60 hover:bg-surface hover:text-primary'
                   )}
                   onClick={() => {
                     setActiveChatSessionId(session.id)
@@ -277,7 +277,7 @@ export default function Chat() {
                         isActive ? 'text-tertiary' : 'text-secondary/50'
                       )}
                     />
-                    <span className="truncate text-[13px]">{session.topic}</span>
+                     <span className="truncate font-label text-[13px]">{session.topic}</span>
                   </div>
                   <button
                     type="button"
@@ -321,7 +321,7 @@ export default function Chat() {
 
       {/* Main chat column */}
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="z-20 flex h-14 shrink-0 items-center justify-between bg-neutral/90 px-4 shadow-[0_1px_0_rgba(58,41,22,0.06)] md:px-6">
+         <header className="z-20 flex min-h-[4.25rem] shrink-0 items-center justify-between gap-4 border-b border-border-subtle/55 bg-neutral/85 px-4 py-3 backdrop-blur-md md:px-8">
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
@@ -332,10 +332,10 @@ export default function Chat() {
               <Menu size={20} />
             </button>
 
-            <div className="min-w-0">
-              <h1 className="truncate font-display text-[15px] font-semibold tracking-tight text-primary sm:text-base">
-                {headerTitle}
-              </h1>
+             <div className="min-w-0">
+               <h1 className="break-words font-display text-[16px] font-semibold leading-snug tracking-tight text-tertiary sm:text-[17px]">
+                 {headerTitle}
+               </h1>
             </div>
           </div>
 
@@ -346,7 +346,7 @@ export default function Chat() {
                 setActiveChatSessionId(null)
                 setSidebarOpen(false)
               }}
-              className="hidden items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] font-medium text-secondary transition-colors hover:bg-secondary/10 hover:text-primary sm:inline-flex"
+               className="hidden items-center gap-1.5 rounded-xl border border-border-subtle/60 bg-surface/35 px-3 py-2 font-label text-[12px] font-semibold text-secondary transition-all hover:border-tertiary/25 hover:bg-surface hover:text-tertiary sm:inline-flex"
             >
               <Plus size={14} />
               {t('chat.new', 'New')}
@@ -378,7 +378,7 @@ export default function Chat() {
         <div className="relative min-h-0 flex-1 overflow-y-auto">
           <div
             className={cn(
-              'mx-auto flex min-h-full max-w-3xl flex-col px-4 md:px-6',
+              'mx-auto flex min-h-full max-w-4xl flex-col px-4 md:px-8',
               isEmpty ? 'justify-center py-10 md:py-14' : 'py-5 md:py-6'
             )}
           >
@@ -447,7 +447,7 @@ export default function Chat() {
         </div>
 
         {/* Composer — no solid divider; soft fade into messages */}
-        <div className="relative z-20 shrink-0 bg-neutral/95">
+         <div className="relative z-20 shrink-0 bg-gradient-to-t from-neutral via-neutral/95 to-transparent pt-4">
           <AnimatePresence>
             {uploadToast && (
               <motion.div
@@ -488,7 +488,7 @@ export default function Chat() {
         className={cn(
           // Mobile: drawer below topbar (z-20 < Topbar z-40 so notif stays on top).
           // Desktop: static in flex row — no viewport overlay.
-          'fixed top-[60px] bottom-0 right-0 z-20 flex min-h-0 flex-col bg-neutral',
+           'fixed top-[60px] bottom-0 right-0 z-20 flex min-h-0 flex-col border-l border-border-subtle/55 bg-neutral/95 backdrop-blur-md',
           'shadow-[inset_1px_0_0_rgba(58,41,22,0.06)]',
           'transition-all duration-300 ease-in-out md:static md:top-auto md:z-auto',
           'w-[min(20rem,88vw)] md:h-full',

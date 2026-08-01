@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BookOpen, Check, ChevronDown, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -17,6 +18,7 @@ const MAX_SESSIONS = 3
 export default function SessionSwitcher({ className }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { activeSession, setActiveSession } = useLearningStore()
   const { data: allSessions = [], isLoading } = useAllSessions()
   const [open, setOpen] = useState(false)
@@ -116,6 +118,7 @@ export default function SessionSwitcher({ className }) {
                     aria-selected={isActive}
                     onClick={() => {
                       setActiveSession(session)
+                      queryClient.setQueryData(['active-session'], session)
                       setOpen(false)
                     }}
                     className={cn(
