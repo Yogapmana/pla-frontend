@@ -45,11 +45,9 @@ const queryClient = new QueryClient({
 })
 
 function RootRedirect() {
-  const { isAuthenticated } = useAuthStore()
-  const token = typeof window !== 'undefined' ? window.localStorage.getItem('pla_token') : null
-  const isLoggedIn = isAuthenticated || !!token
-
-  return <Navigate to={isLoggedIn ? '/dashboard' : '/login'} replace />
+  const { isAuthenticated, authReady } = useAuthStore()
+  if (!authReady) return <PageLoader fullScreen showLogo />
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
 }
 
 function CurriculumRedirect() {
@@ -71,11 +69,10 @@ function NotFoundPage() {
 }
 
 function SessionGuard({ children }) {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, authReady } = useAuthStore()
   const activeSession = useLearningStore((s) => s.activeSession)
   const setActiveSession = useLearningStore((s) => s.setActiveSession)
-  const token = typeof window !== 'undefined' ? window.localStorage.getItem('pla_token') : null
-  const canFetch = isAuthenticated || !!token
+  const canFetch = isAuthenticated
   // Keep previous session visible while revalidating — avoids full-page loader on every nav
   const { data: fetchedSession, isLoading, isFetching } = useActiveSession({
     enabled: canFetch,
@@ -88,7 +85,11 @@ function SessionGuard({ children }) {
     }
   }, [fetchedSession, activeSession, setActiveSession])
 
-  if (!isAuthenticated && !token) {
+  if (!authReady) {
+    return <PageLoader fullScreen showLogo />
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 

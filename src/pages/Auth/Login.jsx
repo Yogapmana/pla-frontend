@@ -60,9 +60,11 @@ export default function Login() {
   const onSubmit = async (data) => {
     setError(null)
     try {
-      const response = await loginApi(data.email, data.password)
-      useAuthStore.getState().logout()
+      // Clear client state only (skipServer) so we do NOT revoke the
+      // cookies that loginApi is about to set.
+      await useAuthStore.getState().logout({ skipServer: true })
       queryClient.clear()
+      const response = await loginApi(data.email, data.password)
       // Pass the response.streak payload through to the auth store
       // — when `is_new_day` is true, the store queues a
       // StreakCelebration modal that AppLayout will render.
@@ -239,9 +241,9 @@ export default function Login() {
                 onSuccess={async (credentialResponse) => {
                   try {
                     setError(null)
-                    const response = await googleLoginApi(credentialResponse.credential)
-                    useAuthStore.getState().logout()
+                    await useAuthStore.getState().logout({ skipServer: true })
                     queryClient.clear()
+                    const response = await googleLoginApi(credentialResponse.credential)
                     login(response.access_token, response.user, response.streak)
                     navigate('/dashboard')
                   } catch (err) {
@@ -254,8 +256,9 @@ export default function Login() {
                 shape="rectangular"
                 theme="outline"
                 size="large"
-                width="100%"
+                width="320"
                 text="signin_with"
+                useOneTap={false}
               />
             </div>
 

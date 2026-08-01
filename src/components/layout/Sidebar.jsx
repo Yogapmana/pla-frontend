@@ -287,7 +287,7 @@ const Sidebar = () => {
 
           <button
             type="button"
-            onClick={logout}
+            onClick={() => logout()}
             aria-label={t("common.logout", "Keluar")}
             className={cn(
               'flex items-center gap-3 w-full rounded-xl text-secondary',

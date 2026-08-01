@@ -98,7 +98,7 @@ export default function Register() {
         password: data.password,
       })
 
-      useAuthStore.getState().logout()
+      await useAuthStore.getState().logout({ skipServer: true })
       queryClient.clear()
 
       const registeredEmail = response?.user?.email || data.email
@@ -319,11 +319,14 @@ export default function Register() {
                 onSuccess={async (credentialResponse) => {
                   try {
                     setError(null)
-                    const response = await googleLoginApi(credentialResponse.credential)
-                    const login = useAuthStore.getState().login
-                    useAuthStore.getState().logout()
+                    await useAuthStore.getState().logout({ skipServer: true })
                     queryClient.clear()
-                    login(response.access_token, response.user, response.streak)
+                    const response = await googleLoginApi(credentialResponse.credential)
+                    useAuthStore.getState().login(
+                      response.access_token,
+                      response.user,
+                      response.streak
+                    )
                     navigate('/dashboard')
                   } catch (err) {
                     setError(err.response?.data?.detail || t('auth.google_register_failed'))
@@ -335,8 +338,9 @@ export default function Register() {
                 shape="rectangular"
                 theme="outline"
                 size="large"
-                width="100%"
+                width="320"
                 text="signup_with"
+                useOneTap={false}
               />
             </div>
           

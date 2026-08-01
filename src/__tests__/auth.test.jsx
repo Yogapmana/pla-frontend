@@ -60,21 +60,22 @@ describe('Authentication Smoke Tests', () => {
     });
   });
 
-  it('Auth store login and logout persists state correctly', () => {
+  it('Auth store login and logout persists user (token is memory-only)', async () => {
     const { login, logout } = useAuthStore.getState();
     const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
     const mockToken = 'mock-token';
 
-    // Test Login
     login(mockToken, mockUser);
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
     expect(useAuthStore.getState().user).toEqual(mockUser);
-    expect(localStorage.getItem('pla_token')).toBe(mockToken);
+    expect(useAuthStore.getState().token).toBe(mockToken);
+    expect(localStorage.getItem('pla_user')).toContain('testuser');
+    // Access token must NOT live in localStorage (httpOnly cookie path)
+    expect(localStorage.getItem('pla_token')).toBeNull();
 
-    // Test Logout
-    logout();
+    await logout({ skipServer: true });
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
     expect(useAuthStore.getState().user).toBeNull();
-    expect(localStorage.getItem('pla_token')).toBeNull();
+    expect(localStorage.getItem('pla_user')).toBeNull();
   });
 });
