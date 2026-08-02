@@ -25,6 +25,12 @@ export function useSubmitQuiz() {
     mutationFn: (data) => submitQuiz(data),
     onSuccess: (_, variables) => {
       const sessionId = variables?.sessionId ?? variables?.session_id
+      const topicId = variables?.topic_id ?? variables?.topicId
+      // Submitted quiz is consumed server-side — drop local copy so
+      // reopen/retry hits API and gets a fresh (or newly cached) set.
+      if (topicId) {
+        queryClient.removeQueries({ queryKey: ['quiz', topicId] })
+      }
       if (sessionId) {
         queryClient.invalidateQueries({ queryKey: ['quiz-results', sessionId] })
         // Also invalidate per-topic views (so the "Attempt N of M"

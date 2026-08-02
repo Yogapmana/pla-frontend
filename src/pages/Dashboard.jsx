@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { getDailyStudyTime } from '../api/progress';
+import { getDailyStudyTime, getRecentActivity } from '../api/progress';
 import { useAuthStore } from '../stores/authStore';
 import { useLearningStore } from '../stores/learningStore';
 import { useCurriculum, useTopics } from '../hooks/useLearning';
@@ -145,6 +145,16 @@ export default function Dashboard() {
     staleTime: 60_000,
   });
 
+  const {
+    data: recentActivityRaw = [],
+    isLoading: loadingActivity,
+  } = useQuery({
+    queryKey: ['recent-activity', sessionId],
+    queryFn: () => getRecentActivity(sessionId, 15),
+    enabled: !!sessionId,
+    staleTime: 30_000,
+  });
+
   // Skeleton only on first load (no cached data). Revisit shows content immediately.
   const loading = !!sessionId && (loadingTopics || loadingQuiz || loadingCurriculum)
     && topics.length === 0 && quizHistory.length === 0 && !curriculum;
@@ -204,20 +214,40 @@ export default function Dashboard() {
   const todayTopic = topics.find(t => t.status === 'active') ||
                       topics.find(t => t.status === 'locked' || !t.status);
 
-  const activities = quizHistory.map(q => {
-    const displayScore = q.score > 1 ? q.score : Math.round(q.score * 100);
-    return {
-      id: q.id,
-      type: 'quiz',
-      title: t('dashboard.activity_quiz', { topic: q.topic_title || 'Topik', defaultValue: `Kuis: ${q.topic_title || 'Topik'}` }),
-      description: t('dashboard.activity_score_time', { score: displayScore, mins: Math.round((q.time_spent_seconds || 0) / 60), defaultValue: `Skor: ${displayScore} — ${Math.round((q.time_spent_seconds || 0) / 60)} menit` }),
-      time: new Date(q.created_at || Date.now()).toLocaleDateString('id-ID'),
-      score: displayScore,
-      // Used by RecentActivity to link each row to the per-topic
-      // history page (`/progress/topic/:topicId`).
-      topicId: q.topic_id,
-    };
-  }).slice(0, 5);
+  const activities = useMemo(() => {
+    if (!Array.isArray(recentActivityRaw) || recentActivityRaw.length === 0) {
+      // Fallback: quiz-only if endpoint empty/unavailable
+      return quizHistory.slice(0, 8).map((q) => {
+        const displayScore = q.score > 1 ? q.score : Math.round(q.score * 100)
+        return {
+          id: q.id,
+          type: 'quiz',
+          title: t('dashboard.activity_quiz', {
+            topic: q.topic_title || 'Topik',
+            defaultValue: `Kuis: ${q.topic_title || 'Topik'}`,
+          }),
+          description: t('dashboard.activity_score_time', {
+            score: displayScore,
+            mins: Math.round((q.time_spent_seconds || 0) / 60),
+            defaultValue: `Skor: ${displayScore} — ${Math.round((q.time_spent_seconds || 0) / 60)} menit`,
+          }),
+          created_at: q.created_at,
+          score: displayScore,
+          topicId: q.topic_id,
+        }
+      })
+    }
+    return recentActivityRaw.map((a) => ({
+      id: a.id,
+      type: a.type,
+      title: a.title,
+      description: a.description,
+      created_at: a.created_at,
+      score: a.score,
+      topicId: a.topic_id,
+      href: a.href,
+    }))
+  }, [recentActivityRaw, quizHistory, t]);
 
   const latestFeedbackTopic = useMemo(() => {
     return [...topics].reverse().find(t => t.feedback_action && t.feedback_action !== "continue" && t.status === "completed");
@@ -349,7 +379,7 @@ export default function Dashboard() {
 
       {/* 4. Recent Activity — full width */}
       <motion.div variants={shouldReduceMotion ? {} : fadeUp}>
-        <RecentActivity activities={activities} />
+        <RecentActivity activities={activities} isLoading={loadingActivity && activities.length === 0} />
       </motion.div>
     </motion.div>
   );

@@ -32,3 +32,9 @@ export function getDailyStudyTime(sessionId, days = 30) {
 export function getTopicSignals(sessionId, topicId) {
   return api.get(`/progress/signals/${sessionId}/${topicId}`).then(res => res.data)
 }
+
+export function getRecentActivity(sessionId, limit = 20) {
+  return api
+    .get(`/progress/${sessionId}/recent-activity`, { params: { limit } })
+    .then((res) => res.data)
+}
