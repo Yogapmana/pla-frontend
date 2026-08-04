@@ -93,31 +93,18 @@ export default function Quiz() {
     }
   };
 
-  // The submitted quiz was consumed server-side. Drop the local cache copy
-  // on unmount (NOT while the page is still mounted) so the next visit or
-  // Retry hits the API and gets a fresh quiz — without triggering a refetch
-  // that would boot us off the result screen mid-display.
-  useEffect(() => {
-    return () => {
-      if (topicId) {
-        queryClient.removeQueries({ queryKey: ['quiz', topicId] })
-      }
-    }
-  }, [queryClient, topicId]);
-
   useEffect(() => {
     if (quizData && !startTime) {
       setStartTime(Date.now());
     }
   }, [quizData, startTime]);
 
-  // If the quiz cannot be loaded because the backend cooldown gate is active
-  // (e.g. after a remount/reload right after a failed submit), restore the
-  // result we just stored so the score is never replaced by a bare timer.
+  // Restore the last submitted result when we come back to this topic's quiz
+  // page (same tab). It shows the score instead of re-fetching — and avoids
+  // triggering another expensive LLM quiz generation on remount, since the
+  // submitted quiz was already consumed server-side.
   useEffect(() => {
     if (!topicId) return
-    const isCooldown = error?.response?.data?.detail?.message === 'cooldown'
-    if (!isCooldown) return
     try {
       const raw = sessionStorage.getItem(`quiz_result:${topicId}`)
       if (!raw) return
@@ -130,7 +117,7 @@ export default function Quiz() {
     } catch {
       /* ignore */
     }
-  }, [topicId, error]);
+  }, [topicId]);
 
   // Result screen must be checked BEFORE isLoading: if a background refetch
   // is in flight we must not swap the score reveal for the loader.
@@ -305,6 +292,9 @@ export default function Quiz() {
 
   const handleRetry = () => {
     clearStoredResult();
+    if (topicId) {
+      queryClient.removeQueries({ queryKey: ['quiz', topicId] })
+    }
     setCurrentIndex(0);
     setAnswers({});
     setQuizState('answering');
