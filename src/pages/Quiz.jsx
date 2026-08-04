@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useQuiz, useSubmitQuiz } from '@/hooks/useQuiz';
 import { useToast } from '@/hooks/use-toast';
 import { useLearningStore } from '@/stores/learningStore';
@@ -70,6 +71,7 @@ export default function Quiz() {
   const navigate = useNavigate()
   const { toast } = useToast();
   const { activeSession } = useLearningStore();
+  const queryClient = useQueryClient();
   
   const { data: quizData, isLoading, error, refetch } = useQuiz(topicId);
   const submitQuiz = useSubmitQuiz();
@@ -79,13 +81,81 @@ export default function Quiz() {
   const [quizState, setQuizState] = useState('answering');
   const [isRevealed, setIsRevealed] = useState(false);
   const [quizResult, setQuizResult] = useState(null);
+  const [resultQuestions, setResultQuestions] = useState(null);
   const [startTime, setStartTime] = useState(null);
+
+  const clearStoredResult = () => {
+    if (!topicId) return
+    try {
+      sessionStorage.removeItem(`quiz_result:${topicId}`)
+    } catch {
+      /* ignore */
+    }
+  };
+
+  // The submitted quiz was consumed server-side. Drop the local cache copy
+  // on unmount (NOT while the page is still mounted) so the next visit or
+  // Retry hits the API and gets a fresh quiz — without triggering a refetch
+  // that would boot us off the result screen mid-display.
+  useEffect(() => {
+    return () => {
+      if (topicId) {
+        queryClient.removeQueries({ queryKey: ['quiz', topicId] })
+      }
+    }
+  }, [queryClient, topicId]);
 
   useEffect(() => {
     if (quizData && !startTime) {
       setStartTime(Date.now());
     }
   }, [quizData, startTime]);
+
+  // If the quiz cannot be loaded because the backend cooldown gate is active
+  // (e.g. after a remount/reload right after a failed submit), restore the
+  // result we just stored so the score is never replaced by a bare timer.
+  useEffect(() => {
+    if (!topicId) return
+    const isCooldown = error?.response?.data?.detail?.message === 'cooldown'
+    if (!isCooldown) return
+    try {
+      const raw = sessionStorage.getItem(`quiz_result:${topicId}`)
+      if (!raw) return
+      const saved = JSON.parse(raw)
+      if (saved?.result) {
+        setQuizResult(saved.result)
+        setResultQuestions(saved.questions ?? null)
+        setQuizState('result')
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [topicId, error]);
+
+  // Result screen must be checked BEFORE isLoading: if a background refetch
+  // is in flight we must not swap the score reveal for the loader.
+  if (quizState === 'result' && quizResult) {
+    const formattedQuestions =
+      resultQuestions ??
+      (quizData
+        ? quizData.questions.map((q, i) => ({
+            ...q,
+            user_answer: answers[q.id || i] || null
+          }))
+        : []);
+
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-0">
+        <QuizResult 
+          result={quizResult}
+          questions={formattedQuestions}
+          topicId={topicId}
+          sessionId={activeSession?.id}
+          onRetry={handleRetry}
+        />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -204,7 +274,23 @@ export default function Quiz() {
         time_spent_seconds: timeSpentSeconds,
         questions_data: quizData.questions
       });
-      
+
+      // Keep a copy of the submitted result so the score/result screen
+      // survives a remount or reload during the failed-quiz cooldown gate.
+      const formattedQuestions = quizData.questions.map((q, i) => ({
+        ...q,
+        user_answer: answers[q.id || i] || null
+      }));
+      setResultQuestions(formattedQuestions);
+      try {
+        sessionStorage.setItem(
+          `quiz_result:${topicId}`,
+          JSON.stringify({ result: res, questions: formattedQuestions })
+        );
+      } catch {
+        /* ignore */
+      }
+
       setQuizResult(res);
       setQuizState('result');
     } catch (err) {
@@ -218,33 +304,16 @@ export default function Quiz() {
   };
 
   const handleRetry = () => {
+    clearStoredResult();
     setCurrentIndex(0);
     setAnswers({});
     setQuizState('answering');
     setIsRevealed(false);
     setQuizResult(null);
+    setResultQuestions(null);
     setStartTime(Date.now());
     refetch();
   };
-
-  if (quizState === 'result' && quizResult) {
-    const formattedQuestions = quizData.questions.map((q, i) => ({
-      ...q,
-      user_answer: answers[q.id || i] || null
-    }));
-
-    return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-0">
-        <QuizResult 
-          result={quizResult}
-          questions={formattedQuestions}
-          topicId={topicId}
-          sessionId={activeSession?.id}
-          onRetry={handleRetry}
-        />
-      </div>
-    );
-  }
 
   const currentQuestion = quizData.questions[currentIndex];
 

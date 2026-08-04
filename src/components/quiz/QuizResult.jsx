@@ -342,7 +342,7 @@ export function QuizResult({ result, questions, topicId, sessionId, onRetry }) {
                 <div className="mt-1">
                   <CooldownTimer
                     initialSeconds={result.cooldown_remaining_seconds}
-                    onComplete={() => window.location.reload()}
+                    onComplete={onRetry}
                     topicId={topicId}
                     feedbackAction={result.feedback_action}
                   />

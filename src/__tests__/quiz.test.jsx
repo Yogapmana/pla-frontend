@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Quiz from '../pages/Quiz';
 import { useQuiz } from '@/hooks/useQuiz';
 
@@ -25,6 +26,17 @@ vi.mock('react-router-dom', () => ({
 }));
 
 describe('Quiz Page Smoke Tests', () => {
+  const renderQuiz = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <Quiz />
+      </QueryClientProvider>
+    );
+  };
+
   it('Quiz page renders questions and options', () => {
     const mockQuizData = {
       questions: [
@@ -45,7 +57,7 @@ describe('Quiz Page Smoke Tests', () => {
       refetch: vi.fn(),
     });
 
-    render(<Quiz />);
+    renderQuiz();
 
     // Check for question text
     expect(screen.getByText(/What is React\?/i)).toBeInTheDocument();
@@ -75,7 +87,7 @@ describe('Quiz Page Smoke Tests', () => {
       refetch: vi.fn(),
     });
 
-    render(<Quiz />);
+    renderQuiz();
 
     const optionButton = screen.getByText(/Library/i);
     fireEvent.click(optionButton);

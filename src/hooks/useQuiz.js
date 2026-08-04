@@ -25,12 +25,13 @@ export function useSubmitQuiz() {
     mutationFn: (data) => submitQuiz(data),
     onSuccess: (_, variables) => {
       const sessionId = variables?.sessionId ?? variables?.session_id
-      const topicId = variables?.topic_id ?? variables?.topicId
-      // Submitted quiz is consumed server-side — drop local copy so
-      // reopen/retry hits API and gets a fresh (or newly cached) set.
-      if (topicId) {
-        queryClient.removeQueries({ queryKey: ['quiz', topicId] })
-      }
+      // NOTE: we intentionally do NOT removeQueries(['quiz', topicId]) here.
+      // Doing so while the Quiz page is still mounted makes react-query
+      // recreate the query and refetch immediately, flipping isLoading back
+      // to true so the result screen is replaced by the loader — and the
+      // backend regenerates a brand-new quiz via the LLM for a topic that
+      // was just consumed/completed. Cache cleanup happens on page unmount
+      // instead (see Quiz.jsx), and Retry forces a refetch() by itself.
       if (sessionId) {
         queryClient.invalidateQueries({ queryKey: ['quiz-results', sessionId] })
         // Also invalidate per-topic views (so the "Attempt N of M"
