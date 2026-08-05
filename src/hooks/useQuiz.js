@@ -15,6 +15,15 @@ export function useQuiz(topicId, numQuestions) {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     staleTime: Infinity,
+    // Poll every 5s while a background Celery job is still generating
+    // the quiz (202 → { ready: false }); stop once the quiz is ready.
+    // Same pattern as useEnhancedMindmap. The caller renders the
+    // "still generating" UI and enforces the poll deadline.
+    refetchInterval: (query) => {
+      const data = query.state.data
+      if (data?.ready === false) return 5000
+      return false
+    },
   })
 }
 
