@@ -345,6 +345,7 @@ export function QuizResult({ result, questions, topicId, sessionId, onRetry }) {
                     onComplete={onRetry}
                     topicId={topicId}
                     feedbackAction={result.feedback_action}
+                    showButtons={false}
                   />
                 </div>
               ) : (

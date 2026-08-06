@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 // refetchInterval) and cap the wait here at 5 minutes.
 const QUIZ_GEN_TIMEOUT_MS = 5 * 60_000
 
-export function CooldownTimer({ initialSeconds, onComplete, topicId, feedbackAction }) {
+export function CooldownTimer({ initialSeconds, onComplete, topicId, feedbackAction, showButtons = true }) {
   const [seconds, setSeconds] = useState(initialSeconds);
 
   useEffect(() => {
@@ -37,26 +37,28 @@ export function CooldownTimer({ initialSeconds, onComplete, topicId, feedbackAct
         Nilai kuis Anda di bawah 80%. Silakan baca dan pelajari kembali materi sebelum mencoba kuis lagi.
       </p>
       
-      <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full max-w-md">
-        <Button 
-          variant="outline" 
-          className="w-full h-11"
-          onClick={() => window.location.href = `/module/${topicId}`}
-        >
-          <BookOpen className="w-4 h-4 mr-2" />
-          Baca Materi Utama
-        </Button>
-        {feedbackAction === 'remedial' && (
+      {showButtons && (
+        <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full max-w-md">
           <Button 
-            variant="default" 
-            className="w-full h-11 bg-tertiary hover:bg-tertiary/90 text-white"
-            onClick={() => window.location.href = `/module/${topicId}/remedial`}
+            variant="outline" 
+            className="w-full h-11"
+            onClick={() => window.location.href = `/module/${topicId}`}
           >
             <BookOpen className="w-4 h-4 mr-2" />
-            Buka Materi Remedial
+            Baca Materi Utama
           </Button>
-        )}
-      </div>
+          {feedbackAction === 'remedial' && (
+            <Button 
+              variant="default" 
+              className="w-full h-11 bg-tertiary hover:bg-tertiary/90 text-white"
+              onClick={() => window.location.href = `/module/${topicId}/remedial`}
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Buka Materi Remedial
+            </Button>
+          )}
+        </div>
+      )}
 
       <div
         role="timer"
