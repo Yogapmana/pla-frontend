@@ -147,7 +147,18 @@ export default function Quiz() {
       if (!raw) return
       const saved = JSON.parse(raw)
       if (saved?.result) {
-        setQuizResult(saved.result)
+        const restored = saved.result
+        // The stored cooldown is a fixed value captured at submit time.
+        // Recompute the real remaining wait based on when it was submitted
+        // so returning to the page doesn't restart the countdown from 10 min.
+        if (restored.cooldown_remaining_seconds > 0 && saved.submitted_at) {
+          const elapsed = Math.max(0, Math.floor((Date.now() - saved.submitted_at) / 1000))
+          restored.cooldown_remaining_seconds = Math.max(
+            0,
+            restored.cooldown_remaining_seconds - elapsed
+          )
+        }
+        setQuizResult(restored)
         setResultQuestions(saved.questions ?? null)
         setQuizState('result')
       }
@@ -335,7 +346,11 @@ export default function Quiz() {
       try {
         sessionStorage.setItem(
           `quiz_result:${topicId}`,
-          JSON.stringify({ result: res, questions: formattedQuestions })
+          JSON.stringify({
+            result: res,
+            questions: formattedQuestions,
+            submitted_at: Date.now(),
+          })
         );
       } catch {
         /* ignore */
