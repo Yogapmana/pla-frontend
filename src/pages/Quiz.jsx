@@ -353,7 +353,7 @@ export default function Quiz() {
     }
   };
 
-  const handleRetry = () => {
+  function handleRetry() {
     clearStoredResult();
     if (topicId) {
       queryClient.removeQueries({ queryKey: ['quiz', topicId] })
@@ -366,7 +366,7 @@ export default function Quiz() {
     setResultQuestions(null);
     setStartTime(Date.now());
     refetch();
-  };
+  }
 
   const currentQuestion = quizData.questions[currentIndex];
 
