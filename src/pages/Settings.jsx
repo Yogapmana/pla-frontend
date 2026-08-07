@@ -500,6 +500,7 @@ export default function Settings() {
         {/* Sections */}
         <div className="w-full flex-1 space-y-5 min-w-0">
           {activeSection === 'profil' && (
+            <div data-tour="settings-profile">
             <SectionCard
               eyebrow={sections[0].eyebrow}
               title={t('settings.profile', 'Profil')}
@@ -638,6 +639,7 @@ export default function Settings() {
                 </div>
               </div>
             </SectionCard>
+            </div>
           )}
 
           {activeSection === 'belajar' && (

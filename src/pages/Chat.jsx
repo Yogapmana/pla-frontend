@@ -499,7 +499,9 @@ export default function Chat() {
                   }
                   className="flex flex-1 flex-col items-center justify-center"
                 >
-                  <WelcomeHero username={user?.username || user?.name} />
+                  <div data-tour="chat-welcome">
+                    <WelcomeHero username={user?.username || user?.name} />
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div
@@ -602,16 +604,18 @@ export default function Chat() {
             )}
           </AnimatePresence>
 
-          <ChatInput
-            onSend={handleSendMessage}
-            onUpload={handleUploadDocument}
-            isLoading={sendMutation.isPending || createSessionMutation.isPending}
-            isUploading={uploadMutation.isPending}
-            placeholder={t(
-              'chat.input_placeholder',
-              'Tanya apapun atau unggah dokumen...'
-            )}
-          />
+          <div data-tour="chat-input">
+            <ChatInput
+              onSend={handleSendMessage}
+              onUpload={handleUploadDocument}
+              isLoading={sendMutation.isPending || createSessionMutation.isPending}
+              isUploading={uploadMutation.isPending}
+              placeholder={t(
+                'chat.input_placeholder',
+                'Tanya apapun atau unggah dokumen...'
+              )}
+            />
+          </div>
         </div>
       </div>
 

@@ -312,7 +312,7 @@ export default function Dashboard() {
         ✦
       </span>
       {/* 1. Page header — greeting */}
-      <motion.div variants={shouldReduceMotion ? {} : fadeUp}>
+      <motion.div data-tour="greeting" variants={shouldReduceMotion ? {} : fadeUp}>
         <GreetingHero
           username={user?.username || 'Pelajar'}
           streak={streak}
@@ -341,7 +341,7 @@ export default function Dashboard() {
       )}
 
       {/* 2. Hero "Continue Learning" card */}
-      <motion.div variants={shouldReduceMotion ? {} : fadeUp}>
+      <motion.div data-tour="continue-hero" variants={shouldReduceMotion ? {} : fadeUp}>
         <ContinueLearningHero
           topic={todayTopic}
           session={activeSession}
@@ -352,7 +352,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* 3. Stats grid — 3 kolom (Streak dipindah ke StreakCard) */}
-      <motion.div variants={shouldReduceMotion ? {} : fadeUp}>
+      <motion.div data-tour="stats" variants={shouldReduceMotion ? {} : fadeUp}>
         <StatCards stats={stats} />
       </motion.div>
 
@@ -363,7 +363,7 @@ export default function Dashboard() {
           powered by the Mastery Score milestones. Both pull
           live data from /api/v1/gamification/* — no fake client
           computations, no stale values. */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
+      <div data-tour="gamification" className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
         <motion.div variants={shouldReduceMotion ? {} : fadeUp}>
           <StreakCard />
         </motion.div>
@@ -374,7 +374,9 @@ export default function Dashboard() {
 
       {/* Analytics Charts */}
       {topics.length > 0 && (
-        <LearningAnalytics topics={topics} quizHistory={quizHistory} sessionId={activeSession?.id} />
+        <div data-tour="analytics">
+          <LearningAnalytics topics={topics} quizHistory={quizHistory} sessionId={activeSession?.id} />
+        </div>
       )}
 
       {/* 4. Recent Activity — full width */}

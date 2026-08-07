@@ -1,9 +1,10 @@
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Menu, Flame } from 'lucide-react'
+import { Menu, Flame, HelpCircle } from 'lucide-react'
 import { useUIStore } from '../../stores/uiStore'
 import { useLearningStore } from '../../stores/learningStore'
+import { useTourStore } from '../../stores/tourStore'
 import { cn } from '../../utils/cn'
 import { NotificationDropdown } from './NotificationDropdown'
 import SessionSwitcher from './SessionSwitcher'
@@ -20,6 +21,7 @@ import SessionSwitcher from './SessionSwitcher'
 const Topbar = () => {
   const { toggleSidebar } = useUIStore()
   const { streak = 0 } = useLearningStore() || {}
+  const replayTour = useTourStore((s) => s.replay)
   const location = useLocation()
 
   const getBreadcrumb = () => {
@@ -87,6 +89,16 @@ const Topbar = () => {
 
       {/* Right section */}
       <div className="flex items-center gap-1.5 sm:gap-2.5">
+        <button
+          type="button"
+          onClick={replayTour}
+          className="rounded-xl p-2 text-secondary transition-colors duration-200 hover:bg-secondary/10 hover:text-primary"
+          aria-label="Panduan fitur"
+          title="Panduan fitur"
+        >
+          <HelpCircle size={19} />
+        </button>
+
         <NotificationDropdown />
 
         {streak > 0 && (

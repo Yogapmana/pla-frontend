@@ -178,6 +178,7 @@ export default function Curriculum() {
           <div className="flex items-center gap-2 flex-wrap justify-end">
             {/* View mode toggle */}
             <div
+              data-tour="curriculum-view"
               role="tablist"
               aria-label="Pilih tampilan kurikulum"
               className="inline-flex items-center gap-1 p-1 bg-surface-1 border border-border-subtle rounded-xl"
@@ -207,6 +208,7 @@ export default function Curriculum() {
 
       {/* ─── Hero progress section ─── */}
       <motion.div
+        data-tour="curriculum-progress"
         variants={stagger}
         initial="hidden"
         animate="visible"
@@ -376,6 +378,7 @@ export default function Curriculum() {
             ) : (
               <motion.div
                 key="grid-view"
+                data-tour="curriculum-week"
                 className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start"
                 variants={shouldReduceMotion ? { hidden: {}, visible: {} } : stagger}
                 initial="hidden"

@@ -321,19 +321,27 @@ export default function Module() {
             </div>
           ) : (
             <>
-              <ModuleArticle module={module} />
-              <StickyActionBar
-                module={module}
-                sessionId={sessionId}
-                topicId={topicId}
-              />
+              <div data-tour="module-article">
+                <ModuleArticle module={module} />
+              </div>
+              <div data-tour="module-complete">
+                <StickyActionBar
+                  module={module}
+                  sessionId={sessionId}
+                  topicId={topicId}
+                />
+              </div>
             </>
           )}
         </main>
       </div>
 
       {/* Tutor AI — desktop: in-layout collapsible/resizable split pane.
-          Mobile: floating trigger + bottom sheet. Mounted once module loads. */}
+          Mobile: floating trigger + bottom sheet. Mounted once module loads.
+          The expand trigger button itself carries `data-tour="module-tutor"`
+          (inside ModuleChatSlider) so the tour spotlight lands exactly on
+          the button — wrapping this component in a div would give the
+          spotlight a 0×0 rect because the trigger is `position: fixed`. */}
       {module && (
         <ModuleChatPanel
           sessionId={sessionId}

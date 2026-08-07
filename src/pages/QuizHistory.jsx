@@ -126,7 +126,7 @@ export default function QuizHistory() {
         <div aria-hidden="true" className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-tertiary/[0.04] blur-3xl pointer-events-none" />
         <div aria-hidden="true" className="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-warning/[0.05] blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 min-w-0">
+        <div className="relative z-10 min-w-0" data-tour="history-header">
           <PageHeader
             title={t('quiz.history_title', 'Riwayat Kuis')}
             subtitle={t('quiz.history_desc', 'Semua kuis yang pernah Anda kerjakan, dikelompokkan per topik.')}

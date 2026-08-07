@@ -5,8 +5,10 @@ import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { useUIStore } from '../../stores/uiStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useTourStore } from '../../stores/tourStore';
 import StreakCelebration from '../gamification/StreakCelebration';
 import LevelUpCelebration from '../gamification/LevelUpCelebration';
+import FeatureTour from '../tour/FeatureTour';
 import { cn } from '../../utils/cn';
 
 const AppLayout = ({ children }) => {
@@ -29,7 +31,20 @@ const AppLayout = ({ children }) => {
   const pendingLevelUp = useAuthStore((s) => s.pendingLevelUp);
   const clearLevelUp = useAuthStore((s) => s.clearLevelUp);
 
+  // The feature tour guides brand-new users right after onboarding.
+  // The streak/level-up celebration (a full-screen blurred overlay at
+  // z-[60]) must not appear while the tour is running — it would blur
+  // the tutorial and intercept its clicks. Both celebrations stay
+  // pending in the auth store, so deferring their render until the
+  // tour finishes (finish/skip) is safe: they show right after.
+  const isTourActive = useTourStore((s) => s.isActive);
+  const isTourSeen = useTourStore((s) => s.seen);
+
   const path = location.pathname;
+  // A brand-new user landing on the dashboard auto-starts the tour on
+  // the next render; hold the celebration until the tour has actually
+  // begun (or the user navigates away) so it can't flash in first.
+  const isTourPending = path === '/dashboard' && !isTourSeen;
   // Chat and Module pages are "app-in-app" layouts: they fill the
   // viewport exactly and manage their own internal scrolling (Chat has
   // a messages scroll area, Module has its own scroll container with
@@ -109,21 +124,30 @@ const AppLayout = ({ children }) => {
           context (z-[60]) regardless of which page the user is on.
           AnimatePresence handles enter/exit transitions; the modal
           reads its data from the auth store and clears it on
-          dismiss so it only ever shows once per login. */}
+          dismiss so it only ever shows once per login.
+          Suppressed while the feature tour is running so the tour's
+          spotlight and tooltip are never covered by the blurred
+          celebration overlay. */}
       <AnimatePresence>
-        {pendingStreakCelebration && (
+        {!isTourActive && !isTourPending && pendingStreakCelebration && (
           <StreakCelebration
             streak={pendingStreakCelebration}
             onClose={clearStreakCelebration}
           />
         )}
-        {pendingLevelUp && (
+        {!isTourActive && !isTourPending && pendingLevelUp && (
           <LevelUpCelebration
             levelUp={pendingLevelUp}
             onClose={clearLevelUp}
           />
         )}
       </AnimatePresence>
+
+      {/* ── Feature Tour ────────────────────────────────────────
+          Rendered outside the flex tree like the celebration modals.
+          Mounted once at the layout level so it survives route
+          changes (cross-page tour steps navigate and continue). */}
+      <FeatureTour />
     </div>
   );
 };

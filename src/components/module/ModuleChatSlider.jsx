@@ -323,6 +323,7 @@ export default function ModuleChatPanel({ sessionId, topicId, moduleTitle }) {
             aria-label="Buka Tutor AI"
             aria-expanded="false"
             aria-controls="tutor-ai-sidebar"
+            data-tour="module-tutor"
             className={cn(
               'fixed right-0 top-[76px] z-40 flex h-12 w-11 items-center justify-center',
               'rounded-l-full border border-r-0 border-tertiary/25 bg-surface text-tertiary',
@@ -340,6 +341,7 @@ export default function ModuleChatPanel({ sessionId, topicId, moduleTitle }) {
         <aside
           id="tutor-ai-sidebar"
           aria-hidden={!isOpen}
+          data-tour="module-tutor"
           style={{ width: isOpen ? width : 0 }}
           className={cn(
             'relative hidden h-full shrink-0 overflow-hidden border-l border-border-subtle/70 bg-surface lg:flex lg:flex-col',
@@ -423,6 +425,7 @@ export default function ModuleChatPanel({ sessionId, topicId, moduleTitle }) {
           aria-label="Buka Tutor AI"
           aria-expanded="false"
           aria-controls="tutor-ai-sheet"
+          data-tour="module-tutor"
           className={cn(
             'fixed right-0 top-[76px] z-40 flex h-12 w-11 items-center justify-center',
             'rounded-l-full border border-r-0 border-tertiary/25 bg-surface text-tertiary',
@@ -443,6 +446,7 @@ export default function ModuleChatPanel({ sessionId, topicId, moduleTitle }) {
           side="bottom"
           hideClose
           hideOverlay
+          data-tour="module-tutor"
           onInteractOutside={(event) => event.preventDefault()}
           onPointerDownOutside={(event) => event.preventDefault()}
           className={cn(
