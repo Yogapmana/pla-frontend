@@ -18,6 +18,19 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+const PUBLIC_AUTH_PATHS = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/',
+]
+
+const isPublicAuthPath = (pathname) =>
+  PUBLIC_AUTH_PATHS.some((p) => p !== '/' && pathname.startsWith(p)) ||
+  pathname === '/'
+
 let isRefreshing = false
 let refreshSubscribers = []
 
@@ -78,7 +91,7 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         useAuthStore.getState().logout({ skipServer: true })
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        if (typeof window !== 'undefined' && !isPublicAuthPath(window.location.pathname)) {
           window.location.replace('/login')
         }
         return Promise.reject(refreshError)
