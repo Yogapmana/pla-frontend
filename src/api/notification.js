@@ -5,5 +5,7 @@ export const notificationApi = {
   markAsRead: (id) => api.put(`/notifications/${id}/read`),
   markAllAsRead: () => api.put('/notifications/read-all'),
   deleteNotification: (id) => api.delete(`/notifications/${id}`),
-  deleteAllNotifications: () => api.delete('/notifications')
+  deleteAllNotifications: () => api.delete('/notifications'),
+  getPreferences: () => api.get('/notifications/preferences'),
+  updatePreferences: (prefs) => api.put('/notifications/preferences', prefs)
 };

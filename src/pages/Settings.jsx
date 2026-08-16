@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,6 +50,7 @@ import {
 } from '@/api/auth'
 import { getQuizHistory } from '@/api/quiz'
 import { deleteSession, getSession, getTopics } from '@/api/learning'
+import { notificationApi } from '@/api/notification'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import { useLearningStore } from '@/stores/learningStore'
@@ -60,25 +61,34 @@ import i18n from '@/i18n'
  *
  * Interactive tabs:
  *  - Profil: editable username + language preference
- *  - Belajar: list of sessions with per-item delete
- *  - Notifikasi: functional email/push toggles (persisted locally)
- *  - Data: export + confirmed delete account
+ *  - Belajar: list of sessions with per-item delete (cascading cleanup)
+ *  - Notifikasi: email/push toggles persisted to the backend
+ *  - Data: export + confirmed delete account (full data purge)
+ */
+
+/* ─── Notification preferences ─────────────────────────────────────
+ * The source of truth is the backend (`/notifications/preferences`),
+ * so toggles survive across devices. localStorage is only a small
+ * cache used to hydrate the UI instantly before the server responds
+ * and is refreshed after every successful save.
  */
 
 const NOTIF_STORAGE_KEY = 'pla_notification_prefs'
 
+const NOTIF_DEFAULTS = { email_enabled: true, push_enabled: true }
+
 function readNotifPrefs() {
-  if (typeof window === 'undefined') return { email: true, push: false }
+  if (typeof window === 'undefined') return NOTIF_DEFAULTS
   try {
     const raw = window.localStorage.getItem(NOTIF_STORAGE_KEY)
-    if (!raw) return { email: true, push: false }
+    if (!raw) return NOTIF_DEFAULTS
     const parsed = JSON.parse(raw)
     return {
-      email: typeof parsed.email === 'boolean' ? parsed.email : true,
-      push: typeof parsed.push === 'boolean' ? parsed.push : false,
+      email_enabled: typeof parsed.email_enabled === 'boolean' ? parsed.email_enabled : true,
+      push_enabled: typeof parsed.push_enabled === 'boolean' ? parsed.push_enabled : true,
     }
   } catch {
-    return { email: true, push: false }
+    return NOTIF_DEFAULTS
   }
 }
 
@@ -225,6 +235,8 @@ export default function Settings() {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false)
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
   const [deletingSessionId, setDeletingSessionId] = useState(null)
+  const [deleteError, setDeleteError] = useState('')
+  const [deleteAccountError, setDeleteAccountError] = useState('')
   const [activeSection, setActiveSection] = useState('profil')
   const [exportSuccess, setExportSuccess] = useState(false)
 
@@ -241,18 +253,63 @@ export default function Settings() {
     ? 'en'
     : 'id'
 
-  // Notifications — fully interactive local state with persistence
+  // Notifications — persisted on the backend, hydrated from a local cache.
   const initialNotif = useMemo(() => readNotifPrefs(), [])
-  const [emailNotif, setEmailNotif] = useState(initialNotif.email)
-  const [pushNotif, setPushNotif] = useState(initialNotif.push)
+  const [emailNotif, setEmailNotif] = useState(initialNotif.email_enabled)
+  const [pushNotif, setPushNotif] = useState(initialNotif.push_enabled)
+  const [notifError, setNotifError] = useState('')
+
+  const {
+    data: notifPrefs,
+    isLoading: notifLoading,
+    refetch: refetchNotifPrefs,
+  } = useQuery({
+    queryKey: ['notification-preferences'],
+    queryFn: () => notificationApi.getPreferences().then((r) => r.data),
+    staleTime: 60_000,
+  })
+
+  const notifMutation = useMutation({
+    mutationFn: (prefs) => notificationApi.updatePreferences(prefs).then((r) => r.data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['notification-preferences'], data)
+      writeNotifPrefs({ email_enabled: data.email_enabled, push_enabled: data.push_enabled })
+      setNotifError('')
+      refetchNotifPrefs()
+    },
+    onError: () => {
+      const prev = queryClient.getQueryData(['notification-preferences'])
+      setEmailNotif(prev?.email_enabled ?? true)
+      setPushNotif(prev?.push_enabled ?? true)
+      setNotifError(
+        t('settings.notif_save_failed', 'Gagal menyimpan preferensi notifikasi. Silakan coba lagi.')
+      )
+    },
+  })
+
+  useEffect(() => {
+    if (notifPrefs) {
+      setEmailNotif(notifPrefs.email_enabled)
+      setPushNotif(notifPrefs.push_enabled)
+      setNotifError('')
+    }
+  }, [notifPrefs])
 
   useEffect(() => {
     setUsernameDraft(user?.username || '')
   }, [user?.username])
 
-  useEffect(() => {
-    writeNotifPrefs({ email: emailNotif, push: pushNotif })
-  }, [emailNotif, pushNotif])
+  const handleNotifChange = useCallback(
+    (key, value) => {
+      const nextEmail = key === 'email' ? value : emailNotif
+      const nextPush = key === 'push' ? value : pushNotif
+      setEmailNotif(nextEmail)
+      setPushNotif(nextPush)
+      setNotifError('')
+      notifMutation.mutate({ email_enabled: nextEmail, push_enabled: nextPush })
+    },
+    [emailNotif, pushNotif, notifMutation]
+  )
 
   const profileInitial = useMemo(
     () => (user?.username?.[0] || 'U').toUpperCase(),
@@ -381,6 +438,7 @@ export default function Settings() {
   const handleDeleteSession = useCallback(
     async (sessionId) => {
       if (!sessionId) return
+      setDeleteError('')
       setDeletingSessionId(sessionId)
       try {
         await deleteSession(sessionId)
@@ -389,25 +447,39 @@ export default function Settings() {
         }
         await queryClient.invalidateQueries({ queryKey: ['sessions'] })
         await queryClient.invalidateQueries({ queryKey: ['active-session'] })
+        await queryClient.invalidateQueries({ queryKey: ['notification-preferences'] })
         await refetchSessions()
+      } catch (err) {
+        const detail = err?.response?.data?.detail
+        setDeleteError(
+          typeof detail === 'string'
+            ? detail
+            : t('settings.delete_session_failed', 'Gagal menghapus sesi. Silakan coba lagi.')
+        )
       } finally {
         setDeletingSessionId(null)
       }
     },
-    [activeSession?.id, queryClient, refetchSessions, setActiveSession]
+    [activeSession?.id, queryClient, refetchSessions, setActiveSession, t]
   )
 
   const handleDeleteAccount = useCallback(async () => {
+    setDeleteAccountError('')
     setIsDeletingAccount(true)
     try {
       await deleteAccount()
       logout()
       window.location.replace('/login')
-    } catch {
+    } catch (err) {
+      const detail = err?.response?.data?.detail
+      setDeleteAccountError(
+        typeof detail === 'string'
+          ? detail
+          : t('settings.delete_account_failed', 'Gagal menghapus akun. Silakan coba lagi.')
+      )
       setIsDeletingAccount(false)
-      setDeleteAccountOpen(false)
     }
-  }, [logout])
+  }, [logout, t])
 
   const username = user?.username || 'Pengguna'
   const email = user?.email || '—'
@@ -648,6 +720,14 @@ export default function Settings() {
               title={t('settings.learning', 'Belajar')}
               subtitle={t('settings.learning_desc', 'Kelola semua sesi belajar aktif dan sebelumnya.')}
             >
+              {deleteError && (
+                <div
+                  role="alert"
+                  className="rounded-xl border border-danger/30 bg-danger/[0.06] px-4 py-3 text-sm text-danger font-label"
+                >
+                  {deleteError}
+                </div>
+              )}
               {sessionsLoading ? (
                 <div className="flex items-center justify-center gap-2 py-10 text-sm text-secondary font-label">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -783,26 +863,50 @@ export default function Settings() {
               title={t('settings.notifications', 'Notifikasi')}
               subtitle={t('settings.notifications_desc', 'Atur bagaimana Synapsa menghubungimu.')}
             >
-              <SettingSwitch
-                icon={Mail}
-                label={t('settings.email_notif', 'Email notifikasi')}
-                description={t('settings.email_notif_desc', 'Terima update progres via email')}
-                checked={emailNotif}
-                onChange={setEmailNotif}
-              />
-              <SettingSwitch
-                icon={Bell}
-                label={t('settings.push_notif', 'Push notifikasi')}
-                description={t('settings.push_notif_desc', 'Terima notifikasi di browser')}
-                checked={pushNotif}
-                onChange={setPushNotif}
-              />
-              <p className="text-xs text-secondary font-label pt-1">
-                {t(
-                  'settings.notif_prefs_hint',
-                  'Preferensi disimpan di perangkat ini.'
-                )}
-              </p>
+              {notifLoading ? (
+                <div className="flex items-center justify-center gap-2 py-10 text-sm text-secondary font-label">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('settings.loading_notif', 'Memuat preferensi...')}
+                </div>
+              ) : (
+                <>
+                  <SettingSwitch
+                    icon={Mail}
+                    label={t('settings.email_notif', 'Email notifikasi')}
+                    description={t('settings.email_notif_desc', 'Terima update progres via email')}
+                    checked={emailNotif}
+                    onChange={(value) => handleNotifChange('email', value)}
+                  />
+                  <SettingSwitch
+                    icon={Bell}
+                    label={t('settings.push_notif', 'Push notifikasi')}
+                    description={t('settings.push_notif_desc', 'Terima notifikasi di browser')}
+                    checked={pushNotif}
+                    onChange={(value) => handleNotifChange('push', value)}
+                  />
+                  <div className="pt-1 flex flex-wrap items-center gap-2">
+                    {notifMutation.isPending && (
+                      <span className="inline-flex items-center gap-1.5 text-xs text-secondary font-label">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        {t('settings.saving_notif', 'Menyimpan...')}
+                      </span>
+                    )}
+                    {notifError && (
+                      <p role="alert" className="text-xs text-danger font-label">
+                        {notifError}
+                      </p>
+                    )}
+                    {!notifMutation.isPending && !notifError && (
+                      <p className="text-xs text-secondary font-label">
+                        {t(
+                          'settings.notif_prefs_hint',
+                          'Preferensi disimpan di akunmu dan berlaku di semua perangkat.'
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
             </SectionCard>
           )}
 
@@ -816,7 +920,13 @@ export default function Settings() {
                   <h3 className="text-[10px] font-label uppercase tracking-widest text-danger mb-3">
                     {t('settings.danger_zone', 'Zona Berbahaya')}
                   </h3>
-                  <AlertDialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen}>
+                  <AlertDialog
+                    open={deleteAccountOpen}
+                    onOpenChange={(open) => {
+                      setDeleteAccountOpen(open)
+                      if (!open) setDeleteAccountError('')
+                    }}
+                  >
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="outline"
@@ -838,6 +948,14 @@ export default function Settings() {
                           )}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
+                      {deleteAccountError && (
+                        <p
+                          role="alert"
+                          className="rounded-lg border border-danger/30 bg-danger/[0.06] px-3 py-2 text-xs text-danger font-label"
+                        >
+                          {deleteAccountError}
+                        </p>
+                      )}
                       <AlertDialogFooter>
                         <AlertDialogCancel
                           className="rounded-xl"
